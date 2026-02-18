@@ -1,0 +1,75 @@
+title: Linux/Unix Shell History Tampering
+id: 4c9f1087-4d5b-4e6a-b91c-8f2ad3c6e1a7
+status: experimental
+description: |
+    Detects multiple methods used by adversaries to clear or disable Linux
+    shell command history (bash, zsh) in order to cover tracks and evade
+    forensic investigation.
+references:
+    - https://attack.mitre.org/techniques/T1070/003/
+    - https://www.hackers-arise.com/post/2016/06/20/covering-your-bash-shell-tracks-antiforensics
+author: zendannyy
+tags:
+    - attack.defense_evasion
+    - attack.t1070.003
+logsource:
+    product: linux
+    category: process_creation
+
+detection:
+    # Detects: rm .bash_history / rm .zsh_history
+    selection_rm:
+        Image|endswith: '/rm'
+        CommandLine|contains:
+            - '.bash_history'
+            - '.zsh_history'
+    # Detects: cat /dev/null > .bash_history
+    selection_cat_null:
+        Image|endswith: '/cat'
+        CommandLine|contains|all:
+            - '/dev/null'
+            - '.bash_history'
+
+    selection_cat_null_zsh:
+        Image|endswith: '/cat'
+        CommandLine|contains|all:
+            - '/dev/null'
+            - '.zsh_history'
+    # Detects: export HISTFILESIZE=0, export HISTSIZE=0, export HISTFILE=0
+    # Note: This targets environments where he full command line (e.g. bash -c "export HISTSIZE=0") is logged
+    # and the parent shell process IS the Image. Coverage depends on your logging pipeline.
+    selection_export_histfilesize:
+        CommandLine|contains|all:
+            - 'HISTFILESIZE'
+            - '=0'
+    selection_export_histsize:
+        CommandLine|contains|all:
+            - 'HISTSIZE'
+            - '=0'
+    selection_export_histfile:
+        CommandLine|contains|all:
+            - 'HISTFILE'
+            - '=0'
+    # Detects: set +o history  (disables history logging in bash)
+    selection_set_history:
+        CommandLine|contains|all:
+            - 'set'
+            - '+o'
+            - 'history'
+    # Condition: ANY of the four selections triggers an alert
+    condition: >-
+        selection_rm or
+        selection_cat_null or
+        selection_cat_null_zsh or
+        selection_export_histfilesize or
+        selection_export_histsize or
+        selection_export_histfile or
+        selection_set_history
+
+falsepositives:
+    - Automated provisioning or configuration management scripts
+      (Ansible, Chef, Puppet) that reset HISTSIZE during provisioning
+    - CI/CD pipelines with shell cleanup steps
+    - 'selection_set_history may produce FPs: any script containing
+      the word "set", "+o", and "history" as separate terms'
+level: high

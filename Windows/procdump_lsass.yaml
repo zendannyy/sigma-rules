@@ -1,0 +1,28 @@
+title: Suspicious Procdump Targeting LSASS
+id: d18b5071-4c45-49fd-97b1-51c7b93ce9d6
+description: | 
+  Detects procdump execution targeting lsass.exe
+  Kind of like https://github.com/SigmaHQ/sigma/blob/6fe7343bf79306884b05837d5e03bcbcb141ce50/rules/windows/builtin/security/win_security_susp_lsass_dump.yml#L19
+
+status: experimental
+logsource:
+  product: windows
+  service: sysmon
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: 'procdump.exe'
+    CommandLine|endswith: 'lsass.exe'
+
+  filter_fp_comsvcs:
+    CommandLine|contains: 'comsvcs.dll'
+
+  condition: selection and not filter_fp_comsvcs
+fields:
+  - Image
+  - CommandLine
+  - User
+  - ParentImage
+falsepositives:
+  - Legitimate memory dumps for troubleshooting (e.g., using comsvcs.dll)
+level: high

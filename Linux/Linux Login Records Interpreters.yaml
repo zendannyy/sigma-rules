@@ -1,0 +1,62 @@
+title: Linux Login Records Manipulation via Interpeters
+id: 29fe2d1f-a9f5-4bf8-8e62-30e5dbe37059
+status: experimental
+description: |
+    Detects adversaries directly manipulating Linux login files to remove evidence of unauthorized access. These
+    binary files record successful logins (wtmp), current sessions (utmp), and failed attempts (btmp). 
+    This rule looks for the use of common interpeters 
+    in the context of editing binary login files. 
+
+    Sophisticated attackers target these files because they're primary
+    forensic artifacts for login tracking.
+
+references:
+    - https://attack.mitre.org/techniques/T1070/002/
+    - https://sandflysecurity.com/blog/using-linux-utmpdump-for-forensics-and-detecting-log-file-tampering
+author: zendannyy
+date: 2026-02-16
+tags:
+    - attack.defense-evasion
+    - attack.t1070.002
+logsource:
+    product: linux
+    category: process_creation
+
+detection:
+    # Direct file manipulation of login records
+    selection_interpreter_edit:
+        Image|endswith:
+            - '/perl'
+            - '/powershell'
+            - '/python'
+            - '/python3'
+
+        CommandLine|contains:
+            - '/var/log/wtmp'
+            - '/var/log/btmp'
+            - '/var/run/utmp'
+
+    # Suspicious operations on login database files
+    selection_suspicious_ops:
+        Image|endswith:
+            - '/dd'
+            - '/truncate'
+            - '/cp'
+        CommandLine|contains:
+            - '/var/log/wtmp'
+            - '/var/log/btmp'
+            - '/var/run/utmp'
+            - 'if=/dev/null'    # dd if=/dev/null of=/var/log/wtmp
+            - 'if=/dev/zero'
+
+    condition: >-
+        selection_interpreter_edit or
+        selection_suspicious_ops
+
+falsepositives:
+    - System administrators performing legitimate maintenance on corrupted
+      utmp files (correlate with change management tickets)
+    - Log rotation scripts that recreate utmp files (logrotate)
+    - Forensic analysts examining utmp files during incident response
+
+level: high

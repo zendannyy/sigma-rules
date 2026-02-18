@@ -1,0 +1,41 @@
+title: Clearing Linux Login Records
+id: 04b0edec-6d93-4cd1-afca-2f062812d9bc
+status: experimental
+description: |
+    Detects multiple methods used by adversaries to clear Linux
+    logs (bash, zsh) in order to cover tracks and evade investigation.
+references:
+    - https://attack.mitre.org/techniques/T1070/002/
+    - https://blog.talosintelligence.com/salt-typhoon-analysis/
+author: zendannyy
+tags:
+    - attack.defense_evasion
+    - attack.t1070.003
+logsource:
+    product: linux
+    category: process_creation
+
+detection:
+    # Detects: clearing of any of the *tmp login records
+    selection_login:
+        Image|endswith: '/rm'
+        CommandLine|contains:
+            - 'btmp'
+            - 'wtmp'
+            - 'utmp'
+            - 'lastlog'
+  
+    selection_bash_history:
+        Image|endswith: '/rm'
+        CommandLine|contains|all:
+            - '.bash_history'
+            - '.zsh_history'
+
+    condition: >-
+        2 of selection_login or
+        selection_bash_history
+
+falsepositives:
+    - Administrator activity clearing logs for debugging
+    - CI/CD pipelines with shell cleanup steps
+level: high

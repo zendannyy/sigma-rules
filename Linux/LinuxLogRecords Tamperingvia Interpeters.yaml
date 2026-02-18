@@ -1,0 +1,21 @@
+# SPL Equivalent of Sigma rule 
+name: Linux Log Records Tampering via Interpeters SPL
+id: 51fbcaf2-6259-11ec-b0f3-acde48001122
+author: zendannyy
+status: production
+type: Hunting
+description: The following detects the tampering of login files, removing evidence of unauthorized access.
+This rule looks for the use of common interpeters in the context of editing binary login files.
+Sophisticated attackers target these files because they're primary forensic artifacts for login tracking.
+SPL equivalent version of existing Sigma rule.
+
+tags:
+    - attack.defense-evasion
+    - attack.t1070.002
+
+data_source:
+- Sysmon for Linux EventID 1
+search:
+`|tstats` count min(_time) as firstTime max(_time) as lastTime from datamodel=Endpoint.Network_Traffic where 
+(Processes.process_path IN ("*/perl", "*/powershell", "*/python", "*/python3") Processes.process IN ("*/var/log/wtmp*", "*/var/log/btmp*", "*/var/run/utmp*")) 
+OR (Processes.process_path IN ("*/dd", "*/truncate", "*/cp") Processes.process IN ("*/var/log/wtmp*", "*/var/log/btmp*", "*/var/run/utmp*", "*if=/dev/null*", "*if=/dev/zero*"))

@@ -1,0 +1,35 @@
+title: Suspicious macOS Keychain Access via security Command
+id: 211273f5-53eb-41c6-bf5d-654db25040bd
+status: experimental
+description: |
+    Detects suspicious usage of the macOS security command to access keychain
+    data, commonly used by known infostealers to extract stored credentials.
+references:
+    - https://objective-see.org/blog/blog_0x7D.html
+    - https://www.sentinelone.com/blog/2024-macos-malware-review-infostealers-backdoors-and-apt-campaigns-targeting-the-enterprise/
+tags:
+    - attack.credential-access
+    - attack.t1555.001  # Keychain
+logsource:
+    product: macos
+    category: process_creation
+detection:
+    selection_security_cmd:
+        Image|endswith: '/security'
+    selection_keychain_operations:
+        CommandLine|contains:
+            - 'dump-keychain'
+            - 'find-generic-password'
+            - 'find-internet-password'
+            - 'export'
+        CommandLine|contains:
+            - '-a'  # Account parameter
+            - '-s'  # Service parameter
+            - '-w'  # Password output
+    filter_legitimate:
+        ParentImage|startswith:
+            - '/System/'
+            - '/usr/bin/'
+            - '/usr/sbin/'
+    condition: selection_security_cmd and selection_keychain_operations and not filter_legitimate
+level: high

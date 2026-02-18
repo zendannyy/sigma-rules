@@ -1,0 +1,23 @@
+title: Long PowerShell Command Line
+id: b7759629-d59f-45a5-b2dc-19c8a1ea9a5e
+description: Detects PowerShell command lines that exceed a certain length, which may indicate obfuscated or automated malicious activity.
+status: experimental
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_image:
+    Image|contains:
+      - 'powershell.exe'
+      - 'pwsh'
+  selection_command:
+    CommandLine|contains:
+      - '.downloadstring('
+      - '.downloadfile('
+      - ';iex('
+  length_selection:
+    CommandLine|re: '^.{100,}'
+  condition: any of selection_* and length_selection
+falsepositives:
+  - Legitimate administrative scripts that use extremely long command lines
+level: medium

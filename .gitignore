@@ -1,0 +1,14 @@
+.idea
+.DS_Store
+.vscode
+
+# logs 
+*.log
+
+
+# Local .terraform directories
+**/.terraform/*
+
+# Python
+__pycache__/
+*.pyc

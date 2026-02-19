@@ -1,0 +1,26 @@
+title: Disable AWS Config Logs
+  auto_generated_guid: 9c10dc6b-20bd-403a-8e67-50ef7d07ed4e
+  status: experimental
+  description: |
+    Disables AWS Config by stopping the configuration recorder, deleting the delivery channel, and deleting the configuration recorder. 
+    An attacker with sufficient permissions can use this to stop configuration change recording and avoid detection of their activity.
+  references: 
+    - https://docs.aws.amazon.com/cli/latest/reference/configservice/stop-configuration-recorder.html
+  tags:
+    - attack.defense_evasion
+    - attack.t1562.008
+logsource:
+    product: aws
+    service: cloudtrail
+    category: cloud_api_call
+detection: 
+    selection_api_call:
+      # - 'aws configservice stop-configuration-recorder --configuration-recorder-name #{configuration_recorder_name} --region #{region}'
+      # - 'aws configservice delete-delivery-channel --delivery-channel-name #{delivery_channel_name} --region #{region}'
+      # - 'aws configservice delete-configuration-recorder --configuration-recorder-name #{configuration_recorder_name} --region #{region}'
+      - StopConfigurationRecorder
+      - DeleteDeliveryChannel
+      - DeleteConfigurationRecorder
+falsepositives:
+    - Legitimate reconfiguration of config recorders by admins (Should have proper Change management)
+level: high

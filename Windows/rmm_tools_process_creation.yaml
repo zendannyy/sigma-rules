@@ -1,0 +1,26 @@
+title: RMM Tools Process Creation
+id: a7f2c8e1-4b9d-4e3a-8f1c-2d5e6a9b0c3d
+description: |
+  Detects process creation for common RMM tools (AnyDesk, Bomgar/BeyondTrust, TeamViewer). 
+  The idea here would be to alert on non approved RMM tools, and anything outside of the one or few approved tools would be suspicious.
+
+status: experimental
+logsource:
+  product: windows
+  service: sysmon
+  category: process_creation
+detection:
+  selection_rmm:
+    Image|contains:
+      - 'anydesk'
+      - 'bomgar'
+      - 'teamviewer'
+  condition: selection_rmm
+fields:
+  - Image
+  - Computer
+  - User
+  - ParentImage
+  - CommandLine
+level: medium
+

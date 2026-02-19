@@ -1,0 +1,35 @@
+title: ClickFix DNS Payload
+id: c2d38705-d19e-4ae8-acb5-4f1e5638efa2
+description: Detects ClickFix-style CMD and PowerShell payloads, accounting for DNS variants.
+status: experimental
+author: zendannyy
+references:
+  - https://thehackernews.com/2026/02/microsoft-discloses-dns-based-clickfix.html?utm_source=zendannyy.substack.com
+tags:
+  - attack.t1204.002
+  - attack.t1059.001
+logsource:
+  product: windows
+  category: process_creation
+
+detection:
+  selection_shell:
+    CommandLine|contains:
+      - 'powershell.exe -w hidden'
+      - 'powershell -windowstyle hidden'
+      - 'powershell -nop -w hidden -ep bypass'
+      - 'cmd /c'
+      - 'cmd.exe /c'
+
+  selection_dns:
+    CommandLine|contains:
+      - 'nslookup'
+      - 'nslookup.exe'
+      - 'findstr "^Name:" '
+      - 'findstr "^Name:" '
+
+  condition: 1 of selection_shell and 1 selection_dns
+
+falsepositives:
+  - Uncommon but legitimate scripted PowerShell usage with similar wording
+level: high

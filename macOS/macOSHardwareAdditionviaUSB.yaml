@@ -1,0 +1,34 @@
+title: macOS Hardware Addition via USB Devices
+id: abae85d2-d52d-4273-a6ef-fac8693826bf
+status: experimental
+description: | 
+  Hunts for unwarranted hardware additions through USB device connections in macOS Unified Logs. In an environment where USB devices are not permitted. 
+  In the absence of system.log which used to show USB entries, this rule attempts to watch for this activity.
+  https://www.mac4n6.com/blog/2020/5/4/analysis-of-apple-unified-logs-quarantine-edition-entry-7-exploring-usbmsc-devices-with-style
+
+references:
+    - https://www.mac4n6.com/blog/2020/5/4/analysis-of-apple-unified-logs-quarantine-edition-entry-7-exploring-usbmsc-devices-with-style
+    - https://attack.mitre.org/detectionstrategies/DET0069/
+author: zendannyy
+date: 2026-02-21
+tags:
+    - attack.initial-access
+    - attack.t1200
+    - macos.usb
+logsource:
+    service: udev
+detection:
+    selection_usb_devices:
+        action: 'mounted'
+    selection_device_types:
+        device_type:
+            - 'storage'
+            - 'network'
+            - 'hid'
+    selection_timing_pattern:
+        timeframe: 5m
+    condition: selection_usb_devices and selection_device_types | count() by device_id >= 3
+falsepositives:
+    - Legitimate USB device usage
+    - User productivity devices
+level: medium

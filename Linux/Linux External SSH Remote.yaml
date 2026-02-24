@@ -1,0 +1,29 @@
+title: Linux External SSH Remote Service Access
+id: 299139c9-ab68-4c23-bb3f-f4fd348e9eab
+status: experimental
+description: Hunts for unusual external SSH access patterns indicating Technique T1133
+references:
+    - https://attack.mitre.org/techniques/T1133/
+    - https://attack.mitre.org/detectionstrategies/DET0354/
+author: zendannyy
+date: 2026-02-21
+tags:
+    - attack.initial-access
+    - attack.t1133
+    - linux.ssh
+logsource:
+    service: sshd
+detection:
+    selection_external_access:
+        action: 'login'
+        result: 'success'
+    filter_geographic_anomaly:
+        src_ip|cidr: 
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    condition: selection_external_access and not filter_geographic_anomaly
+falsepositives:
+    - Legitimate remote work involving SSH
+    - Automated backup systems
+level: medium

@@ -1,0 +1,31 @@
+title: Linux Hardware Addition via USB Devices
+id: abae85d2-d52d-4273-a6ef-fac8693826bf
+status: experimental
+description: Hunts for unwarranted hardware additions through USB device connections. In an environment where USB devices are not permitted. 
+references:
+    - https://attack.mitre.org/techniques/T1200/
+    - https://attack.mitre.org/detectionstrategies/DET0069/
+author: zendannyy
+date: 2026-02-21
+tags:
+    - attack.initial_access
+    - attack.t1200
+    - linux.usb
+logsource:
+    service: udev
+detection:
+    selection_usb_devices:
+        action: 'add'
+        subsystem: 'usb'
+    selection_device_types:
+        device_type:
+            - 'storage'
+            - 'network'
+            - 'hid'
+    selection_timing_pattern:
+        timeframe: 5m
+    condition: selection_usb_devices and selection_device_types | count() by device_id >= 3
+falsepositives:
+    - Legitimate USB device usage
+    - User productivity devices
+level: medium

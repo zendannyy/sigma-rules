@@ -9,6 +9,7 @@ references:
 tags:
     - attack.persistence
     - attack.privilege-escalation
+    - attack.t1562.010
 logsource:
     product: github
     category: audit

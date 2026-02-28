@@ -5,7 +5,7 @@ description: Detects creation of backdoor accounts with high privileges such as 
 references:
     - https://attack.mitre.org/techniques/T1136/001/
 author: zendannyy
-date: 2026-02-24
+date: 2026-02-26
 tags:
     - attack.persistence
     - attack.privilege-escalation

@@ -1,0 +1,36 @@
+title: Linux SSH Session Takeover Detection
+id: b8c9d0e1-d0e1-4563-bcde-890123456789
+status: experimental
+description: | 
+  Detects active SSH session takeover attempts. 
+  Watching for common terminal multiplexing utilities attaching to sessions. 
+references:
+    - https://attack.mitre.org/techniques/T1563/001/
+author: zendannyy
+date: 2026-02-28
+tags:
+    - attack.lateral-movement
+    - attack.t1563.001
+logsource:
+    category: process_creation
+detection:
+    selection_session_tools:
+        Image|endswith:
+            - '/screen'
+            - '/tmux'
+            - '/reptyr'
+    selection_attach_operations:
+        CommandLine|contains:
+            - 'attach'
+            - '-d'
+            - '-r'
+            - '-x'
+    selection_process_manipulation:
+        CommandLine|contains:
+            - 'PPID'
+            - 'pts/'
+            - 'tty'
+    condition: selection_session_tools and selection_attach_operations and selection_process_manipulation
+falsepositives:
+    - System administration activities
+level: high

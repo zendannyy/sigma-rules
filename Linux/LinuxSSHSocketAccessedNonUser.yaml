@@ -1,0 +1,36 @@
+title: Linux SSH Session Takeover Detection
+id: b8c9d0e1-c2d3-4e5f-8a9b-0123456789ab
+status: experimental
+description: |
+  Detects active SSH session takeover attempts.
+  When the process of one user accesses another user's SSH agent
+references:
+    - https://attack.mitre.org/techniques/T1563/001/
+author: zendannyy
+date: 2026-02-28
+tags:
+    - attack.lateral-movement
+    - attack.t1563.001
+logsource:
+    category: process_creation
+detection:
+    selection_session_tools:
+        Image|endswith:
+            - '/screen'
+            - '/tmux'
+            - '/reptyr'
+    selection_socket_accessed:
+        CommandLine|contains:
+            - '~/.ssh'
+            - '/tmp/ssh'
+    filter_same_user:
+      user_name:
+        - '%session_username%'
+    condition: >-
+      selection_session_tools and selection_socket_accessed
+      and not filter_same_user
+falsepositives:
+    - System administration activities (SRE debugging, etc.)
+level: high
+
+

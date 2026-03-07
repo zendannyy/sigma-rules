@@ -1,0 +1,37 @@
+title: Windows VNC Application Usage
+id: 835026d0-3aef-4702-b857-4932b46cbbe6
+status: experimental
+description: | 
+  Detects VNC-based lateral movement activities. Looking for specific Windows VNC processes. 
+  This rule would make sense in an environment where VNC is not used on an enterprise level. 
+references:
+    - https://attack.mitre.org/techniques/T1021/005/
+author: zendannyy
+date: 2026-03-05
+tags:
+    - attack.lateral_movement
+    - attack.t1021.005
+    - linux.vnc
+logsource:
+    category: network
+detection:
+    selection_vnc_ports:
+        dst_port:
+            - 5900
+            - 5901
+            - 5902
+            - 5903
+    selection_vnc_process:
+      Image|endswith:
+        - 'tvncserver.exe''
+        - 'vncviewer.exe'
+        - 'ultravnc.exe'
+
+    selection_successful_connection:
+        connection_state: 'established'
+    condition: >-
+      selection_vnc_ports and selection_vnc_process and selection_successful_connection
+falsepositives:
+    - Legitimate remote desktop access by an admin
+    - Remote administration
+level: medium

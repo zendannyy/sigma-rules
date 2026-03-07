@@ -1,0 +1,35 @@
+title: Linux VNC Application Usage
+id: d0e1f2g3-1021-detect-defg-012345678901
+status: experimental
+description: Detects VNC-based activities. Looking for specific VNC processes 
+references:
+    - https://attack.mitre.org/techniques/T1021/005/
+author: zendannyy
+date: 2026-03-05
+tags:
+    - attack.lateral_movement
+    - attack.t1021.005
+    - linux.vnc
+logsource:
+    category: network
+detection:
+    selection_vnc_ports:
+        dst_port:
+            - 5900
+            - 5901
+            - 5902
+            - 5903
+    selection_vnc_process:
+      Image|endswith:
+        - 'tightvnc'
+        - 'vncserver'
+        - 'x11vnc'
+
+    selection_successful_connection:
+        connection_state: 'established'
+    condition: >-
+      selection_vnc_ports and selection_vnc_process and selection_successful_connection
+falsepositives:
+    - Legitimate remote desktop access by an admin
+    - Remote administration
+level: medium

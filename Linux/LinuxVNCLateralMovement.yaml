@@ -1,0 +1,38 @@
+title: Linux VNC Lateral Movement
+id: d0e1f2g3-1021-detect-defg-012345678901
+status: experimental
+description: Detects VNC-based lateral movement activities. East to West traffic 
+references:
+    - https://attack.mitre.org/techniques/T1021/005/
+author: zendannyy
+date: 2026-03-05
+tags:
+    - attack.lateral_movement
+    - attack.t1021.005
+    - linux.vnc
+logsource:
+    category: network
+detection:
+    selection_vnc_ports:
+        dst_port:
+            - 5900
+            - 5901
+            - 5902
+            - 5903
+    selection_internal_ip:
+        src_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+        dst_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    selection_successful_connection:
+        connection_state: 'established'
+    condition: >-
+      selection_vnc_ports and selection_internal_ip and selection_successful_connection
+falsepositives:
+    - Legitimate remote desktop access by an admin
+    - Remote administration
+level: medium

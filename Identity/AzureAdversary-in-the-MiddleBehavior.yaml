@@ -1,0 +1,35 @@
+title: Possible Azure Adversary-in-the-Middle (AiTM) Session Cookie Hijack
+id: 0683b6a4-bd7c-4737-ac87-cadca1998b49
+status: experimental
+description: |
+  Detects successful Entra ID sign-ins that exhibit characteristics of an Adversary-in-the-Middle (AiTM) session cookie hijack.
+  This activity is often associated with AiTM phishing kits like Tycoon2FA, where attackers replay stolen session cookies from unmanaged devices to bypass MFA.
+author: detections.ai
+references:
+  - https://www.microsoft.com/en-us/security/blog/2026/03/04/inside-tycoon2fa-how-a-leading-aitm-phishing-kit-operated-at-scale/
+date: 2026-03-07
+tags:
+  - attack.credential-access
+  - attack.t1557
+  - attack.t1098.005
+logsource:
+  product: azure
+  service: signinlogs
+detection:
+  selection:
+    # Detects sign-ins from a browser, a common client for AiTM attacks
+    properties.clientAppUsed: 'Browser'
+    properties.riskLevelDuringSignIn:
+      - 'medium'
+      - 'high'
+    # The following conditions correlate to unmanaged/unregistered devices often used in AiTM session replay
+    # The logs will not have a deviceId or trustType since this is not a legitimate corporate managed device
+    properties.deviceDetail.isManaged: 'false'
+    properties.deviceDetail.isCompliant: 'false'
+    properties.deviceDetail.trustType:
+    properties.deviceDetail.deviceId:
+  condition: selection
+falsepositives:
+  - Legitimate user sign-ins from personal or unmanaged devices that are flagged as risky by Entra ID Protection for other reasons (e.g., anonymous IP, unfamiliar location).
+  - Tuning may be required based on the organization's baseline for risky sign-ins and device management policies.
+level: high

@@ -1,5 +1,5 @@
 title: Linux VNC Application Usage
-id: d0e1f2g3-1021-detect-defg-012345678901
+id: 72ee52da-31e1-40bb-9726-31366e13b036
 status: experimental
 description: Detects VNC-based activities. Looking for specific VNC processes 
 references:

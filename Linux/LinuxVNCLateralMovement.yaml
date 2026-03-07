@@ -1,5 +1,5 @@
 title: Linux VNC Lateral Movement
-id: d0e1f2g3-1021-detect-defg-012345678901
+id: 9015766d-6e74-4ea4-9d09-b6fcbb37fa54
 status: experimental
 description: Detects VNC-based lateral movement activities. East to West traffic 
 references:

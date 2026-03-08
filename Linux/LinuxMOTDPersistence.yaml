@@ -1,0 +1,27 @@
+title: Linux MOTD Persistence Detection
+id: 84998714-0b6b-4965-910b-45bb33da4783
+description: Detects malicious Message of the Day scripts for persistence
+references:
+    - https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms
+tags:
+  - attack.persistence
+  - attack.t1037
+logsource:
+  product: linux
+  catergory: process-creation
+detection:
+    selection_motd_paths:
+        TargetFilename|contains:
+            - '/etc/update-motd.d/'
+            - '/etc/motd.d/'
+    selection_executable_scripts:
+        TargetFilename|re: '/\d{2}-[a-zA-Z0-9_-]+'
+        FilePermissions|contains: '+x'
+    selection_malicious_content:
+        FileContent|contains:
+            - '/dev/tcp/'
+            - 'curl'
+            - 'nc -'
+            - 'wget'
+    condition: selection_motd_paths and selection_executable_scripts and selection_malicious_content
+level: medium

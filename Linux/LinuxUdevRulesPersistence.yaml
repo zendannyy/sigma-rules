@@ -1,0 +1,27 @@
+title: Linux Udev Rules Persistence
+id: 7bac5c98-7aa9-4a0b-82bc-681c04ff4d17
+description: Detects malicious udev rules for persistence
+references:
+    - https://attack.mitre.org/techniques/T1546/017/
+    - https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms
+tags:
+  - attack.persistence
+  - attack.t1546.017
+logsource:
+  product: linux
+  category: process_creation
+detection:
+    selection_udev_creation:
+        OriginalFileName|contains:
+          - '/etc/udev/rules.d/'
+          - '/run/udev/rules.d/' 
+          - '/usr/lib/udev/rules.d/' 
+        OriginalFileName|endswith: '.rules'
+    selection_malicious_invoking:
+        CommandLine|contains:
+            - 'RUN+='
+            - '/tmp/'
+            - '/dev/shm/'
+            - 'bash -c'
+    condition: selection_udev_creation and selection_malicious_invoking
+level: high

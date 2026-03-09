@@ -1,0 +1,37 @@
+title: Reg Run Key Persistence
+id: bddcc2fe-4e9a-48af-a674-756c4bcb1ecd
+status: experimental
+description: |
+  Detects modification of Windows Registry Run/RunOnce keys, which are a common
+  persistence mechanism used by adversaries. Ex: Fawkes C2 agent uses the 'persist
+  -method registry' command to write to HKCU/HKLM Run keys, ensuring the
+  implant executes on user logon or system startup.
+author: zendannyy
+date: 2026-03-08
+modified: 2026-03-08
+references:
+  - https://attack.mitre.org/techniques/T1547/001/
+tags:
+  - attack.persistence
+  - attack.t1547.001
+logsource:
+  category: registry_set
+  product: windows
+detection:
+  selection:
+    registry.path|contains:
+      - '\CurrentVersion\Run\'
+      - '\CurrentVersion\RunOnce\'
+      - '\CurrentVersion\RunServices\'
+      - '\CurrentVersion\RunServicesOnce\'
+  filter_legitimate:
+    process.executable|contains:
+      - 'C:\Windows\System32\msiexec.exe'
+      - 'C:\Windows\System32\svchost.exe'
+      - 'C:\Program Files\Microsoft'
+      - 'C:\Program Files (x86)\Microsoft'
+  condition: selection and not filter_legitimate
+falsepositives:
+  - Legitimate software installations writing Run keys
+  - Enterprise management tools (SCCM, Intune)
+level: high

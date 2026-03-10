@@ -1,0 +1,47 @@
+title: APT36 Vibeware C2 Over Trusted Services (LOTS)
+id: 3a607f9e-14ff-457f-a94b-60c1b5acb47e
+status: experimental
+description: Detects network connections to trusted cloud and collaboration services (like Discord, Slack, Google Sheets, Supabase, Firebase) from non-browser and non-approved applications. This technique, known as Living Off Trusted Services (LOTS), is used by threat actors like APT36 to blend command and control (C2) traffic with legitimate network activity, as seen in Transparent Tribe Threat Actor
+author: zendannyy
+references:
+  - https://www.bitdefender.com/en-us/blog/businessinsights/apt36-nightmare-vibeware
+date: 2026-03-09
+tags:
+  - attack.command_and_control
+  - attack.t1102 # Web Service
+  - attack.g0134
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_lots:
+    # Detects connections to domains associated with popular trusted services
+    DestinationHostname|endswith:
+      - 'discord.com'
+      - 'discord.gg'
+      - 'slack.com'
+      - 'googleapis.com'  # Covers Google Sheets, Drive, and Firebase
+      - 'supabase.co'
+      - 'supabase.io'
+  selection_encoded:
+        CommandLine|contains:
+            - '-E'
+            - '-e'
+            - '-enc'
+            - '/enc:'
+  filter_legit_apps:
+    # Exclude common browsers and official desktop clients for these services
+    Image|endswith:
+      - '\chrome.exe'
+      - '\firefox.exe'
+      - '\msedge.exe'
+      - '\brave.exe'
+      - '\opera.exe'
+      - '\Discord.exe'
+      - '\slack.exe'
+  condition: >-
+    selection_lots and selection_encoded and not filter_legit_apps
+falsepositives:
+  - Legitimate third-party applications, scripts (PowerShell, Python), or developer tools that integrate with these services may trigger this alert.
+  - Consider adding legitimate applications specific to your environment to the 'filter_legit_apps' section.
+level: medium

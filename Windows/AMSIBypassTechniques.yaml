@@ -1,0 +1,37 @@
+title: AMSI Bypass Techniques Detection
+id: 7f8b3c1d-9e2a-4b8c-a5d6-3e4f7a9b2c8e
+status: stable
+description: Detects various AMSI bypass techniques including reflection-based and registry modifications
+references:
+    - https://attack.mitre.org/techniques/T1562/001/
+    - https://mostafayahiax.medium.com/hunting-for-amsi-bypassing-methods-9886dda0bf9d
+    - https://amsi.fail/
+author: zendannyy
+date: 2026/03/09
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+    - attack.t1562.006
+logsource:
+    product: windows
+detection:
+    selection_reflection:
+        ScriptBlockText|contains:
+            - 'amsiInitFailed'
+            - 'AmsiScanString'
+            - 'AmsiUtils'
+            - 'NonPublic,Static'
+            - '.SetValue($null,$true)'
+    selection_registry:
+        TargetObject|endswith: '\Software\Microsoft\Windows Script\Settings\AmsiEnable'
+        Details: 'DWORD (0x00000000)'
+    selection_provider_removal:
+        CommandLine|contains:
+            - 'AMSI\Providers\'
+            - 'Remove-Item'
+            - '{2781761E-28E0-4109-99FE-B9D127C57AFE}'
+    condition: any of selection*
+falsepositives:
+    - Security research and testing
+    - PowerShell v2 usage for legacy applications
+level: high

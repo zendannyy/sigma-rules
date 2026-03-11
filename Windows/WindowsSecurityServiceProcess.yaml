@@ -1,0 +1,54 @@
+title: Windows Security Service and Process Termination
+id: b9f4c8e7-6d3a-4f2b-9c1e-8a7b5d4e9f2c
+status: stable
+description: Detects attempts to terminate various security-related processes and services
+references:
+    - https://attack.mitre.org/techniques/T1562/001/
+author: zendannyy
+date: 2026/03/10
+tags:
+    - attack.defense-evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_taskkill:
+        Image|endswith: '\taskkill.exe'
+        CommandLine|contains:
+            - 'windefend'
+            - 'msmpeng.exe'
+            - 'msseces.exe'
+            - 'mcshield.exe'
+            - 'ntrtscan.exe'
+            - 'tmlisten.exe'
+            - 'bdagent.exe'
+            - 'avgnt.exe'
+            - 'savapi.exe'
+            - 'ccevtmgr.exe'
+            - 'fsav32.exe'
+            - 'vsserv.exe'
+    selection_net_stop:
+        CommandLine|contains|all:
+            - 'net stop'
+        CommandLine|contains:
+            - 'WinDefend'
+            - 'SecurityHealthService'
+            - 'wscsvc'
+            - 'WdNisSvc'
+            - 'Sense'
+            - 'WdBoot'
+            - 'WdFilter'
+    selection_powershell_stop:
+        CommandLine|contains:
+            - 'Stop-Service'
+            - 'Stop-Process'
+            - 'Get-Process | Stop-Process'
+        CommandLine|contains:
+            - 'WinDefend'
+            - 'MsMpEng'
+            - 'SecurityHealthService'
+    condition: any of selection*
+falsepositives:
+    - Legitimate administrative service management
+level: high

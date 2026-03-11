@@ -1,0 +1,28 @@
+title: macOS TCC Directory Masquerading
+id: df358079-88ef-4af1-93c3-e027438e73c7
+status: experimental
+description: Detects the renaming of the macOS TCC (Transparency, Consent, and
+  Control) directory. This is a specific evasion technique where malware renames
+  the directory to 'com.appled.tcc' to release file locks on the TCC.db,
+  allowing for the injection of permissions.
+author: zendannyy
+references:
+  - http://darktrace.com/blog/applescript-abuse-unpacking-a-macos-phishing-campaign
+date: 2026-03-10
+tags:
+  - attack.t1222.002
+  - attack.t1553.006
+  - attack.defense_evasion
+logsource:
+  category: file_event
+  product: macos
+detection:
+  # Detects the specific rename action from the legitimate TCC directory to the masqueraded one.
+  selection:
+    SourcePath|endswith: '/Library/Application Support/com.apple.TCC'
+    DestinationPath|endswith: '/Library/Application Support/com.appled.tcc'
+  condition: selection
+falsepositives:
+  - This is a highly specific technique, and false positives are considered
+    unlikely.
+level: high

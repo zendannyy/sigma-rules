@@ -1,0 +1,50 @@
+title: SMB Lateral Movement via Administrative Shares
+id: 2e46177f-23ec-4f98-a1a6-0d28a23d1234
+status: stable
+description: Detects lateral movement attempts using SMB administrative shares
+references:
+    - https://attack.mitre.org/techniques/T1021/002/
+    - https://cyberdefenders.org/blog/soc-playbook-lateral-movement-detection-and-response-guide/
+author: zendannyy
+date: 2026/03/13
+tags:
+    - attack.lateral-movement
+    - attack.t1021.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_admin_share_access:
+        EventID:
+            - 5140  # Network share accessed
+            - 5145  # Network share checked for access permissions
+        ShareName|endswith:
+            - 'C$'
+            - 'ADMIN$'
+            - 'IPC$'
+    selection_remote_file_copy:
+        EventID: 5145
+        ObjectType: 'File'
+        AccessMask: '0x100180'  # WriteData, AppendData, Synchronize
+        RelativeTargetName|endswith:
+            - '.dll'
+            - '.exe'
+            - '.bat'
+            - '.cmd'
+            - '.ps1'
+            - '.vbs'
+    selection_suspicious_source:
+        IpAddress|regex: '^(?!127\.0\.0\.1|::1|localhost).*'  # Not localhost
+        SubjectUserName|endswith: '$'  # Computer account
+    selection_psexec_like:
+        RelativeTargetName|contains:
+            - 'PSEXESVC'
+            - 'PSEXEC-'
+            - '\Windows\Temp\'
+            - '\Windows\System32\'
+        # Aggregate rule - requires correlation for same source accessing multiple targets
+    condition: selection_admin_share_access and (selection_suspicious_source or selection_psexec_like)
+falsepositives:
+    - Legitimate administrative activities
+    - System backup operations  
+level: medium

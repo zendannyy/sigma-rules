@@ -1,4 +1,4 @@
-title: SMB Lateral Movement via Administrative Shares
++title: SMB Lateral Movement via Administrative Shares
 id: 2e46177f-23ec-4f98-a1a6-0d28a23d1234
 status: stable
 description: Detects lateral movement attempts using SMB administrative shares

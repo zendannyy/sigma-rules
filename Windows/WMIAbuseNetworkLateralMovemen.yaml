@@ -1,0 +1,64 @@
+title: WMI Abuse Network Lateral Movement
+id: 77e5ca0d-fa84-451d-bb13-7c229fba42e7
+status: stable
+description: Detects WMI abuse for lateral movement through Network connections, remote execution, and persistence
+references:
+    - https://attack.mitre.org/techniques/T1047/
+    - https://attack.mitre.org/techniques/T1546/003/
+author: Security Research Team
+date: 2026/03/09
+tags:
+    - attack.lateral-movement
+    - attack.persistence
+    - attack.execution
+    - attack.t1047
+    - attack.t1546.003
+logsource:
+    product: windows
+detection:
+    selection_wmi_lateral_movement:
+        EventID: 4624  # Logon
+        LogonType: 3  # Network logon
+        ProcessName|endswith: '\wmiprvse.exe'
+        IpAddress|regex: '^(?!127\.0\.0\.1|::1).*'  # Remote source
+    selection_wmi_event_filter:
+        EventID: 19  # WMI Event Filter
+        Operation: 'Created'
+        EventNamespace: 'root\subscription'
+    selection_wmi_consumer:
+        EventID: 20  # WMI Event Consumer
+        Operation: 'Created'
+        Type|contains:
+            - 'Command Line Event Consumer'
+            - 'Active Script Event Consumer'
+    selection_wmi_binding:
+        EventID: 21  # WMI Event Consumer to Filter Binding
+        Operation: 'Created'
+    selection_powershell_wmi:
+        ProcessCommandLine|contains:
+            - 'Get-WmiObject'
+            - 'Invoke-WmiMethod'
+            - 'Register-WmiEvent'
+            - 'New-CimSession'
+        ProcessCommandLine|contains:
+            - '-ComputerName'
+            - '-Credential'
+            - 'Win32_Process'
+    selection_suspicious_wql:
+        ProcessCommandLine|contains:
+            - '__InstanceCreationEvent'
+            - '__InstanceModificationEvent'
+            - '__InstanceDeletionEvent'
+        ProcessCommandLine|contains:
+            - 'Win32_Process'
+            - 'Win32_LogonSession'
+    filter_legitimate:
+        # NT or SCCM
+        User|startswith: 'NT AUTHORITY\'
+        ProcessCommandLine|contains: 'CCM_'  
+    condition: any of selection* and not filter_legitimate
+falsepositives:
+    - SCCM and other management tools
+    - Legitimate system administration
+    - Monitoring and inventory software
+level: medium

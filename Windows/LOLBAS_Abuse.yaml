@@ -1,0 +1,39 @@
+title: Living Off The Land Binary (LOLBAS) Abuse
+id: 480e8cd6-5cae-4a0a-bbbb-2e22d6e124e4
+status: test
+description: Detects abuse of legitimate Windows binaries (LOLBAS) interacting with many others for malicious purposes. Correlation rule
+references:
+    - https://attack.mitre.org/techniques/T1218/011/
+    - https://lolbas-project.github.io/
+author: zendannyy
+date: 2026/03/16
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1218.011
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_rundll32_suspicious:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains:
+            - 'javascript:'
+            - 'vbscript:'
+            - 'mshtml,RunHTMLApplication'
+            - 'shell32.dll,Control_RunDLL'
+            - 'url.dll,OpenURL'
+    selection_wmic_xsl:
+        Image|endswith: '\wmic.exe'
+        CommandLine|contains|all:
+            - '/format:'
+            - '.xsl'
+    filter_legitimate_sources:
+        CommandLine|contains:
+            - 'microsoft.com'
+            - 'windowsupdate.com'
+            - 'download.windowsupdate.com'
+    condition: any of selection* and not filter_legitimate_sources
+falsepositives:
+    - Administrative scripts interacting with these binaries
+level: medium

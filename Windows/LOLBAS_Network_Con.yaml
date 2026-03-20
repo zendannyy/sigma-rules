@@ -1,0 +1,71 @@
+title: Living Off The Land Binary (LOLBAS) Network Connections
+id: e7d4b8f2-9a5c-4b1e-8f7d-3c6a9b2e5d4f
+status: test
+description: Detects abuse of legitimate Windows binaries making network connections for malicious purposes
+references:
+    - https://attack.mitre.org/techniques/T1218/
+    - https://lolbas-project.github.io/
+author: zendannyy
+date: 2026/03/16
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_regsvr32_network:
+        Image|endswith: '\regsvr32.exe'
+        CommandLine|contains:
+            - '/i:http'
+            - '/i:ftp'
+            - '.sct'
+            - 'scrobj.dll'
+        CommandLine|contains|all:
+            - '/s'
+            - '/u'
+    selection_certutil_download:
+        Image|endswith: '\certutil.exe'
+        CommandLine|contains:
+            - '-urlcache'
+            - '-verifyctl'
+            - '-split'
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+            - 'ftp://'
+    selection_mshta_network:
+        Image|endswith: '\mshta.exe'
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+            - 'ftp://'
+            - 'javascript:'
+            - 'vbscript:'
+    selection_installutil_network:
+        Image|endswith: '\InstallUtil.exe'
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+        CommandLine|contains:
+            - '/logfile='
+            - '/U'
+    selection_msiexec_network:
+        Image|endswith: '\msiexec.exe'
+        CommandLine|contains:
+            - '/i http'
+            - '/package http'
+            - '/a http'
+            - 'http://'
+            - 'https://'
+    filter_legitimate_sources:
+        CommandLine|contains:
+            - 'microsoft.com'
+            - 'windowsupdate.com'
+            - 'download.windowsupdate.com'
+    condition: any of selection* and not filter_legitimate_sources
+falsepositives:
+    - Administrative scripts making network connections with these binaries
+    - Software deployment tools making network connections with these binaries
+level: medium

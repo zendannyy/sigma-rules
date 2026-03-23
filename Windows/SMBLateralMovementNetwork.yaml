@@ -1,4 +1,4 @@
-title: SMB Lateral Movement via Admin Shares or Network Connection
+mqlmqltitle: SMB Lateral Movement via Admin Shares or Network Connection
 id: c8e9a7f3-2d1b-4c5e-8f9a-6b3d7e4c2a1f
 status: stable
 description: Detects lateral movement attempts using SMB administrative shares

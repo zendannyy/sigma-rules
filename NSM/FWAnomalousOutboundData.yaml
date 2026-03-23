@@ -1,0 +1,51 @@
+title: Firewall Anomalous Outbound Data Volume - Exfiltration Risk
+status: experimental
+description: Detects internal hosts sending more than 500 MB to external destinations in a 24-hour period via Fortinet, Palo Alto, or Zscaler. Large outbound transfers that exceed typical baseline volumes are a strong indicator of data exfiltration, when combined with unusual session counts.
+tags:
+    - attack.exfiltration
+    - attack.t1048
+logsource:
+    category: firewall
+    service: traffic
+detection:
+    selection:
+        DeviceVendor:
+            - 'Fortinet'
+            - 'Palo Alto Networks'
+            - 'Sophos'
+            - 'Zscaler'
+        DeviceAction:
+            - 'deny'
+            - 'block'
+            - 'drop'
+            - 'BLOCK'
+            - 'DROP'
+            - 'Reset-Both'
+      src_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+      dst_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+        SentBytes|gt: 300300000
+    filter_action:
+        DeviceAction:
+            - 'deny'
+            - 'block'
+            - 'drop'
+            - 'BLOCK'
+            - 'DROP'
+            - 'Reset-Both'
+    filter_destination:
+      src_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+      dst_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    condition: selection and not filter_action and not filter_destination
+level: high

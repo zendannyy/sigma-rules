@@ -1,0 +1,79 @@
+title: Supply Chain Compromise via Telecommunications Infrastructure
+id: c9d7e8f3-2a4b-4c5e-9f8d-6e7a8c5b2d1a
+status: experimental
+description: Detects supply chain compromise activity targeting telecommunications infrastructure
+references:
+    - https://attack.mitre.org/techniques/T1195/002/
+    - https://www.blackberry.com/en/secure-communications/insights/glossary/salt-typhoon
+author: zendannyy
+date: 2026/03/31
+tags:
+    - attack.initial-access
+    - attack.t1195.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_telecom_vendors:
+        CommandLine|contains:
+            - 'Cisco'
+            - 'Ericsson'
+            - 'Nokia'
+            - 'Huawei'
+            - 'Samsung'
+            - 'Juniper'
+            - 'Fortinet'
+            - 'ZTE'
+    selection_firmware_update_process:
+        Image|endswith:
+            - '\update.exe'
+            - '\firmware.exe'
+            - '\installer.exe'
+        CommandLine|contains:
+            - 'firmware'
+            - 'bootloader'
+            - 'BIOS'
+            - 'UEFI'
+            - 'upgrade'
+            - 'patch'
+    selection_telecom_infrastructure:
+        CommandLine|contains:
+            - 'base station'
+            - 'cell tower'
+            - 'antenna'
+            - 'router'
+            - 'switch'
+            - 'gateway'
+            - '5G'
+            - 'LTE'
+            - 'telecom'
+    selection_network_equipment:
+        ProcessCommandLine|contains:
+            - 'SNMP'
+            - 'Telnet'
+            - 'SSH'
+            - 'HTTP'
+            - 'HTTPS'
+        src_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    selection_unauthorized_certificates:
+        EventID: 1  # Process creation
+        CommandLine|contains:
+            - 'certificate'
+            - 'digital signature'
+            - 'code signing'
+            - 'trust store'
+    filter_selection:
+        dst_ip|cidr:
+            - '10.0.0.0/8'
+            - '172.16.0.0/12'
+            - '192.168.0.0/16'
+    condition: >-
+      selection_telecom_vendors and (selection_firmware_update_process or selection_telecom_infrastructure or selection_unauthorized_certificates)
+      and not filter_selection
+falsepositives:
+    - Legitimate firmware updates
+    - Network equipment maintenance
+level: high

@@ -1,0 +1,36 @@
+title: Linux SSH Authorized Keys Modification
+id: 4ceea729-218a-4c26-8f3e-9ad7c340f95d
+status: experimental
+description: Detects commands writing to authorized_keys files, a common SSH persistence method.
+reference: https://d3fend.mitre.org/offensive-technique/attack/T1098.004/
+author: zen
+date: 2026-04-20
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_path:
+    CommandLine|contains:
+      - '/.ssh/authorized_keys'
+      - '/root/.ssh/authorized_keys'
+  selection_writer:
+    Image|endswith:
+      - '/echo'
+      - '/tee'
+      - '/cat'
+      - '/cp'
+      - '/mv'
+      - '/python'
+      - '/perl'
+  condition: selection_path and selection_writer
+fields:
+  - Image
+  - CommandLine
+  - User
+  - ParentCommandLine
+falsepositives:
+  - Legitimate key rotation
+level: high
+tags:
+  - attack.persistence
+  - attack.t1098.004

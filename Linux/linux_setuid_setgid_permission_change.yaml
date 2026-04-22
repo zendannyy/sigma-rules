@@ -1,0 +1,37 @@
+title: Linux Setuid or Setgid Permission Change
+id: 1da8217e-a6d0-4295-84bf-56f6d3f83e85
+status: experimental
+description: | 
+  Detects chmod usage that sets SUID or SGID bits, which can be abused for privilege escalation.
+  2 is the special bit for SGID
+  4 is the special bit for SetUID 
+  6 combines the special bits for SetUID and SGID
+reference:
+  - https://chmodcommand.com/
+author: zendannyy
+date: 2026-04-20
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_chmod:
+    Image|endswith: '/chmod'
+  selection_suid_sgid:
+    CommandLine|contains:
+      - ' u+s'
+      - ' g+s'
+      - ' 4755'
+      - ' 6755'
+      - ' 2755'
+  condition: selection_chmod and selection_suid_sgid
+fields:
+  - Image
+  - CommandLine
+  - User
+  - ParentImage
+falsepositives:
+  - Legitimate package install or hardening task
+level: medium
+tags:
+  - attack.privilege-escalation
+  - attack.t1548.001

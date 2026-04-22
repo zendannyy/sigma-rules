@@ -1,0 +1,35 @@
+title: Linux Security Service Disable Attempt
+id: 5112d550-cf4f-4f18-8f4f-5f2dbba6e1e2
+status: experimental
+description: Detects attempts to stop or disable Linux security and logging services.
+author: zen
+date: 2026-04-20
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_action:
+    CommandLine|contains:
+      - 'systemctl stop '
+      - 'systemctl disable '
+      - 'service '
+  selection_service:
+    CommandLine|contains:
+      - 'auditd'
+      - 'rsyslog'
+      - 'ufw'
+      - 'firewalld'
+      - 'apparmor'
+      - 'selinux'
+      - 'seccomp'
+  condition: selection_action and selection_service
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Planned security stack maintenance
+level: high
+tags:
+  - attack.defense-evasion
+  - attack.t1562.001

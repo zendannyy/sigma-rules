@@ -1,0 +1,35 @@
+title: Linux Cron Persistence from Temporary Paths
+id: 8801125a-f0a8-4a6b-9ed8-886b69550afb
+status: experimental
+description: Detects cron job creation or edits that execute payloads from temporary or writable directories.
+tags:
+  - attack.persistence
+  - attack.t1053.003
+reference:
+  - https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms
+author: zendanny
+date: 2026-04-20
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_cron:
+    CommandLine|contains:
+      - 'crontab -e'
+      - 'crontab -l'
+      - '/etc/cron.d/'
+      - '/etc/crontab'
+      - '/var/spol/cron/crontab'
+  selection_temp_exec:
+    CommandLine|contains:
+      - '/tmp/'
+      - '/var/tmp/'
+      - '/dev/shm/'
+  condition: selection_cron and selection_temp_exec
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Temporary admin troubleshooting task
+level: high

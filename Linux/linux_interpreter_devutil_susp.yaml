@@ -1,0 +1,48 @@
+title: Linux Interpreter One-Liner With Suspicious Primitives
+id: cae0f7d9-2a4f-48c0-b40a-9d5a6f4e3c2d
+status: experimental
+description: |
+  Detects php/perl/ruby one-liner execution patterns combined with network or shell invocation primitives, 
+  consistent with trusted interpreter abuse and execution guardrail bypass.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1059.004
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_interpreter:
+    Image|endswith:
+      - '/php'
+      - '/perl'
+      - '/ruby'
+  selection_one_liner:
+    CommandLine|contains:
+      - ' -e '
+      - ' -r '
+  selection_suspicious:
+    CommandLine|contains:
+      - 'curl'
+      - 'wget'
+      - 'system('
+      - 'exec('
+      - 'passthru'
+      - 'shell_exec'
+      - 'socket'
+  filter_legit_scripts:
+    Image|contains:
+      - 'allowlisted_1'
+      - 'allowlisted_2'
+  condition: >-
+    selection_interpreter and selection_one_liner and selection_suspicious
+    and not filter_legit_scripts
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Small admin utilities that legitimately wrap curl in ruby/perl scripts
+  - Will require an allowlist here
+level: medium

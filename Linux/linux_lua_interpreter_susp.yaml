@@ -1,0 +1,48 @@
+title: Linux Lua Interpreter One-Liner With Suspicious Primitives
+id: f2e3b4c5-d6e7-489a-b123-456789abcdef
+status: experimental
+description: |
+  Detects lua one-liner execution (-e) combined with OS execution, subprocess, dynamic loading,
+  or network primitives, consistent with trusted interpreter abuse.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1059.011
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_interpreter:
+    Image|endswith:
+      - '/lua'
+      - '/lua5.1'
+      - '/lua5.2'
+      - '/lua5.3'
+      - '/lua5.4'
+  selection_one_liner:
+    CommandLine|contains:
+      - ' -e '
+  selection_suspicious:
+    CommandLine|contains:
+      - 'os.execute'
+      - 'io.popen'
+      - "require('socket"
+      - 'require("socket'
+      - 'loadstring('
+      - 'package.loadlib'
+      - 'http.request'
+  filter_legit_scripts:
+    Image|contains:
+      - 'allowlisted_1'
+      - 'allowlisted_2'
+  condition: >-
+    selection_interpreter and selection_one_liner and selection_suspicious
+    and not filter_legit_scripts
+fields:
+  - CommandLine
+  - Image
+  - User
+falsepositives:
+  - Embedded Lua tooling that legitimately uses io
+level: medium

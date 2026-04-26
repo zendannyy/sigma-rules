@@ -1,0 +1,41 @@
+title: Linux Mount Bind From Temp Into System Paths
+id: bad9e6c8-1f3e-47bf-a39f-8c4f5e3d2b1c
+status: experimental
+description: Detects mount(8) bind operations from writable temp directories onto sensitive system subtrees, sometimes used to bypass integrity expectations or overlay binaries.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1564.013
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_mount:
+    Image|endswith: '/mount'
+  selection_bind:
+    CommandLine|contains:
+      - '--bind'
+      - '-o bind'
+  selection_temp_src:
+    CommandLine|contains:
+      - '/tmp/'
+      - '/var/tmp/'
+      - '/dev/shm/'
+  selection_system_dst:
+    CommandLine|contains:
+      - '/etc/'
+      - '/bin/'
+      - '/sbin/'
+      - '/lib/'
+      - '/lib64/'
+      - '/usr/bin/'
+      - '/usr/sbin/'
+  condition: selection_mount and selection_bind and selection_temp_src and selection_system_dst
+fields:
+  - CommandLine
+  - Image
+  - User
+falsepositives:
+  - Container and appliance tooling that uses bind mounts during upgrades
+level: high

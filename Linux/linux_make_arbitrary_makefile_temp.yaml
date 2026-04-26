@@ -1,0 +1,31 @@
+title: Linux Make Arbitrary Makefile From Temp Paths
+id: b4e3d0c2-5f7e-41b9-ad3f-2c8f9e7d6b5c
+status: experimental
+description: Detects make explicitly loading a Makefile from temporary or non-standard locations, often used to run arbitrary commands via a trusted build utility.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1059.004
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_make:
+    Image|endswith: '/make'
+  selection_makefile_flag:
+    CommandLine|contains:
+      - '-f /tmp/'
+      - '-f /var/tmp/'
+      - '-f /dev/shm/'
+      - '-f /dev/fd/'
+      - '-f /dev/stdin'
+  condition: selection_make and selection_makefile_flag
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Developer workflows that intentionally build from /tmp in CI sandboxes
+level: medium
+

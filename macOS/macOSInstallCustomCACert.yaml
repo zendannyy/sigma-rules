@@ -1,0 +1,38 @@
+title: macOS Install Custom CA Cert Material
+id: 4e5f6071-8293-491a-d345-f01234567890
+status: experimental
+description: |
+  Detects copying or writing certificate material and modifications to system keychains. Execution of `security add-trusted-cert`.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1553.004
+logsource:
+  product: macOS
+  category: process_creation
+detection:
+  selection_writer:
+    Image|endswith:
+      - '/cp'
+      - '/mv'
+      - '/tee'
+      - '/curl'
+      - '/wget'
+  selection_ca_paths:
+    CommandLine|contains:
+      - 'security add-trusted-cert'
+      - '/etc/ssl/certs/'
+      - /Library/Keychains/
+  filter_ca:
+    - your_ca_goes_here
+  condition: >-
+    selection_writer and selection_ca_paths
+    and not filter_ca
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Enterprise device management installing internal CAs
+level: medium

@@ -1,0 +1,36 @@
+title: Linux World-Writable Permissions on Sensitive Paths
+id: 5f607182-93a4-492a-e456-012345678901
+status: experimental
+description: |
+  Detects chmod(1) usage that makes sensitive system paths world-writable (777), weakening filesystem guardrails.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1222.002
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_chmod:
+    Image|endswith: '/chmod'
+  selection_world_writable:
+    CommandLine|contains:
+      - ' 777 '
+      - '=777'
+  selection_sensitive:
+    CommandLine|contains:
+      - '/etc/passwd'
+      - '/etc/shadow'
+      - '/etc/sudoers'
+      - '/etc/ssh/'
+      - '/etc/cron'
+  condition: selection_chmod and selection_world_writable and selection_sensitive
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Misguided troubleshooting in lab environments
+  - Will serve as a hutning rule, not a detection rule on its own.
+level: high

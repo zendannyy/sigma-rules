@@ -1,0 +1,31 @@
+title: Linux Strip Remove Symbols From Binary in Writable Locations
+id: c6d7e8f9-0a1b-499a-f123-789012345678
+status: experimental
+description: |
+  Detects strip(1) removing symbols from binaries referenced under temporary or user-writable paths,
+  consistent with binary obfuscation or anti-analysis (Defense Evasion).
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1027
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_strip:
+    Image|endswith: '/strip'
+  selection_temp_target:
+    CommandLine|contains:
+      - '/tmp/'
+      - '/var/tmp/'
+      - '/dev/shm/'
+      - '/home/'
+  condition: selection_strip and selection_temp_target
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Developers stripping debug symbols from locally built artifacts
+level: low

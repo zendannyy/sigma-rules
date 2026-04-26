@@ -1,0 +1,39 @@
+title: Linux Install Custom CA Certificate Material
+id: 4e5f6071-8293-491a-d345-f01234567890
+status: experimental
+description: |
+  Detects copying or writing certificate material into OS trust bundle locations used by update-ca-certificates,
+  consistent with subverting trust controls by installing a custom root CA (Defense Evasion).
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1553.004
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_writer:
+    Image|endswith:
+      - '/cp'
+      - '/mv'
+      - '/tee'
+      - '/curl'
+      - '/wget'
+  selection_ca_paths:
+    CommandLine|contains:
+      - '/usr/local/share/ca-certificates/'
+      - '/etc/pki/ca-trust/source/anchors/'
+      - '/etc/ssl/certs/'
+  filter_ca:
+    - your_ca_goes_here
+  condition: >-
+    selection_writer and selection_ca_paths
+    and not filter_ca
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Enterprise device management installing internal root CAs
+level: medium

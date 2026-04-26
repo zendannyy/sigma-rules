@@ -1,0 +1,28 @@
+title: Linux SELinux Permissive Mode via setenforce
+id: 60718293-a4b5-493a-f567-123456789012
+status: experimental
+description: |
+  Detects setenforce(8) setting SELinux to permissive mode, a common impair-defenses technique on Linux hosts.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1562.001
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_setenforce:
+    Image|endswith: '/setenforce'
+  selection_permissive:
+    CommandLine|contains:
+      - 'setenforce 0'
+      - 'setenforce\t0'
+  condition: selection_setenforce and selection_permissive
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Temporary permissive mode during policy debugging by administrators
+level: medium

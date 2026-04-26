@@ -1,0 +1,43 @@
+title: Linux Clear or Disable Shell Command History
+id: b20c30d4-e5f6-4789-abcd-ef0123456789
+status: experimental
+description: |
+  Detects commands that clear interactive shell history or disable history persistence,
+  consistent with Defense Evasion (impairing command history visibility).
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1070.003
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_clear_history:
+    CommandLine|contains:
+      - 'history -c'
+      - 'history -r'
+      - 'cat /dev/null > '
+      - ': > '
+      - 'truncate -s 0 '
+  selection_histfile_disable:
+    CommandLine|contains:
+      - 'unset HISTFILE'
+      - 'HISTFILE=/dev/null'
+      - 'HISTFILESIZE=0'
+      - 'HISTSIZE=0'
+  selection_histfile_paths:
+    CommandLine|contains:
+      - '.bash_history'
+      - '.zsh_history'
+      - '.python_history'
+  condition: >-
+    (selection_clear_history and selection_histfile_paths)
+    or selection_histfile_disable
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - User privacy scripts and container entrypoints that reset history intentionally
+level: low

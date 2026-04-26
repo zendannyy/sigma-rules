@@ -1,0 +1,35 @@
+title: Linux Bootloader Configuration Modification
+id: 8293a4b5-c6d7-495a-b789-345678901234
+status: experimental
+description: |
+  Detects edits to GRUB configuration files, consistent with pre-OS boot manipulation for defense evasion or persistence.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1542.001
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_editor:
+    Image|endswith:
+      - '/sed'
+      - '/tee'
+      - '/echo'
+      - '/vim'
+      - '/vi'
+      - '/nano'
+  selection_grub_paths:
+    CommandLine|contains:
+      - '/etc/default/grub'
+      - '/etc/grub.d/'
+      - '/boot/grub/'
+  condition: selection_editor and selection_grub_paths
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Kernel upgrades and legitimate bootloader maintenance
+level: medium

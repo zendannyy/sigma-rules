@@ -1,0 +1,37 @@
+title: Linux Masquerading via Moving Binaries Out of System Paths
+id: 0a1b2c3d-4e5f-4678-a901-bcdef0123456
+status: experimental
+description: |
+  Detects mv(1) operations that relocate binaries from typical system directories into user-writable locations,
+  consistent with renaming/moving system utilities to evade expectations (Defense Evasion).
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1036.003
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_mv:
+    Image|endswith: '/mv'
+  selection_src_system:
+    CommandLine|contains:
+      - '/bin/'
+      - '/sbin/'
+      - '/usr/bin/'
+      - '/usr/sbin/'
+  selection_dst_writable:
+    CommandLine|contains:
+      - '/tmp/'
+      - '/var/tmp/'
+      - '/dev/shm/'
+      - '/home/'
+  condition: selection_mv and selection_src_system and selection_dst_writable
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Rare packaging or recovery workflows that relocate utilities during upgrades
+level: medium

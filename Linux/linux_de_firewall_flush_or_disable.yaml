@@ -1,0 +1,44 @@
+title: Linux Host Firewall Flush or Disable
+id: f60a70b8-c9d0-492b-ef01-234567890123
+status: experimental
+description: |
+  Detects iptables/nftables commands that flush rulesets or set permissive default policies,
+  consistent with impairing a host firewall (Defense Evasion).
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1562.004
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_iptables:
+    Image|endswith: '/iptables'
+  selection_iptables_flush:
+    CommandLine|contains:
+      - ' -F'
+      - ' --flush'
+  selection_iptables_policy:
+    Image|endswith: '/iptables'
+    CommandLine|contains|all:
+      - 'POLICY'
+      - 'ACCEPT'
+  selection_nft_flush:
+    Image|endswith: '/nft'
+    CommandLine|contains: 'flush'
+  selection_nft_delete_table:
+    Image|endswith: '/nft'
+    CommandLine|contains: 'delete table'
+  condition: >-
+    (selection_iptables and selection_iptables_flush)
+    or selection_iptables_policy
+    or selection_nft_flush
+    or selection_nft_delete_table
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Network engineering maintenance and automated network bring-up scripts
+level: medium

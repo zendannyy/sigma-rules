@@ -1,0 +1,33 @@
+title: Linux AppArmor Profile Disable or Parser Abuse
+id: b5c6d7e8-f9a0-498a-e012-678901234567
+status: experimental
+description: |
+  Detects aa-disable / apparmor_parser usage that disables or replaces AppArmor profiles, impairing mandatory access controls.
+reference:
+  - https://manpages.debian.org/unstable/apparmor-utils/aa-disable.8.en.html
+author: zendannyy
+date: 2026-04-27
+tags:
+  - attack.defense-evasion
+  - attack.t1562.001
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_aa_disable:
+    Image|endswith: '/aa-disable'
+  selection_apparmor_parser:
+    Image|endswith: '/apparmor_parser'
+  selection_disable_flags:
+    CommandLine|contains:
+      - '--remove'
+      - ' -R '
+      - ' -R'
+  condition: selection_aa_disable or (selection_apparmor_parser and selection_disable_flags)
+fields:
+  - CommandLine
+  - Image
+  - User
+falsepositives:
+  - Profile updates during legitimate package maintenance
+level: medium

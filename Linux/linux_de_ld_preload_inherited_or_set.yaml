@@ -1,0 +1,26 @@
+title: Linux Dynamic Linker Hijacking via LD_PRELOAD In Command Line
+id: 3d4e5f60-7182-490a-c234-ef0123456789
+status: experimental
+description: |
+  Detects process creation where LD_PRELOAD is set on the command line, consistent with dynamic linker hijacking
+  for defense evasion or persistence.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1574.006
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_ld_preload:
+    CommandLine|contains:
+      - 'LD_PRELOAD='
+  condition: selection_ld_preload
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Rare developer debugging of dynamic linking issues
+level: medium

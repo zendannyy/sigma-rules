@@ -1,0 +1,39 @@
+title: Linux Clear or Shrink System Journal Logs
+id: a10b20c3-d4e5-4678-9abc-def012345678
+status: experimental
+description: |
+  Detects attempts to delete, truncate, or aggressively vacuum systemd journal data under /var/log/journal,
+  consistent with indicator removal on Linux hosts (Defense Evasion).
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1070.002
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_tools:
+    Image|endswith:
+      - '/rm'
+      - '/shred'
+      - '/truncate'
+      - '/journalctl'
+  selection_journal_targets:
+    CommandLine|contains:
+      - '/var/log/journal'
+      - '/var/log/journal/'
+  selection_journalctl_vacuum:
+    CommandLine|contains|all:
+      - 'journalctl'
+      - '--vacuum'
+  condition: >-
+    (selection_tools and selection_journal_targets)
+    or selection_journalctl_vacuum
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Disk space maintenance and legitimate journal retention tuning
+level: medium

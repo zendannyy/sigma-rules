@@ -1,0 +1,42 @@
+title: Linux Docker Run With Weakened Isolation Options
+id: d7e8f9a0-1b2c-4a0a-a234-890123456789
+status: experimental
+description: |
+  Detects docker run commands that disable or weaken common container guardrails (seccomp, AppArmor, capabilities),
+  consistent with execution guardrail bypass prior to follow-on activity.
+author: zendannyy
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1480
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_docker:
+    Image|endswith: '/docker'
+  selection_run:
+    CommandLine|contains: 'docker run'
+  selection_seccomp_unconfined:
+    CommandLine|contains: '--security-opt seccomp=unconfined'
+  selection_apparmor_unconfined:
+    CommandLine|contains: '--security-opt apparmor=unconfined'
+  selection_sys_admin_cap:
+    CommandLine|contains: '--cap-add=SYS_ADMIN'
+  selection_privileged:
+    CommandLine|contains: '--privileged'
+  condition: >-
+    selection_docker and selection_run
+    and (
+      selection_seccomp_unconfined
+      or selection_apparmor_unconfined
+      or selection_sys_admin_cap
+      or selection_privileged
+    )
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - CI/CD pipelines and local developer containers that intentionally run privileged for builds
+level: low

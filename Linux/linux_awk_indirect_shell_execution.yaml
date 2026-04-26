@@ -1,0 +1,32 @@
+title: Linux Awk Indirect Command Execution
+id: a3f2c9b1-4e6d-40a8-9c2f-1b7e8d6c5a4b
+status: experimental
+description: | 
+  Detects awk one-liners invoking system/exec, a common LOLBIN-style execution guardrail bypass.
+  For example, using environmental variables where an attacker modifies the environment variable to point to a malicious binary.
+author: zendannyy
+date: 2026-04-25
+tags:
+  - attack.defense-evasion
+  - attack.t1202
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_awk:
+    Image|endswith: '/awk'
+    CommandLine|contains:
+      - 'BEGIN'
+  selection_exec_primitive:
+    CommandLine|contains:
+      - 'system('
+      - 'exec('
+      - 'while ('
+  condition: selection_awk and selection_exec_primitive
+fields:
+  - CommandLine
+  - Image
+  - User
+falsepositives:
+  - Text processing scripts that legitimately use system/exec with awk
+level: medium

@@ -1,0 +1,39 @@
+title: Shell Exec via Cat Redirection 
+id: 7715799-2815-4b56-a54f-d63a2c1ca4e8
+status: experimental
+description: Detects the execution of cat, followed by network connections. Specifically /dev/tcp/ redirection
+author: zendanyy
+references:
+  -  https://medium.com/@stefanos.kalandaridis/bash-ing-your-network-f7069ab7c5f4
+date: 2026-03-18
+tags:
+  - attack.defense-evasion
+  - attack.execution
+  - attack.t1059.004
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_shell:
+    Image|endswith:
+      - '/bash'
+      - '/dash'
+      - '/sh'
+      - '/tcsh'
+      - '/csh'
+      - '/zsh'
+      - '/ksh'
+      - '/fish'
+        # Looks for the 'cat' utility in the command line
+    CommandLine|contains: 'cat '
+  selection_indicator:
+      # Detects redirection to special network device files
+    CommandLine|contains:
+      - '/dev/tcp/'
+      - '/dev/udp/'
+      - '<'
+      - '>'
+      - '&'
+  condition: selection_shell and selection_indicator
+falsepositives:
+  - Legit administration or network diagnostic scripts may use this technique, although it is uncommon.

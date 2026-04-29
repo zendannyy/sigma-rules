@@ -1,0 +1,37 @@
+title: Linux Docker Run Exec Guardrails
+id: a4b5c6d7-e8f9-497a-d901-567890123456
+status: experimental
+description: |
+  Detects docker run commands that enumerate and target environmental validation behavioral chain
+  Indicative of attempting to bypass execution guardrails.
+author: zendannyy
+date: 2026-04-26
+tags:
+  - attack.defense-evasion
+  - attack.t1480
+reference:
+  - https://attack.mitre.org/techniques/T1480/
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_docker:
+    Image|endswith: '/docker'
+  selection_enumeration:
+    CommandLine|contains: 
+      - 'lsblk'
+      - 'hostname'
+      - 'mount'
+      - 'uname'
+  selection_privileged:
+    CommandLine|contains: '--privileged'
+  condition: >-
+    selection_docker and selection_run
+      and selection_privileged
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - CI/CD pipelines and local developer containers that intentionally run privileged for builds
+level: low

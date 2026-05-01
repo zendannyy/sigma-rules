@@ -17,7 +17,7 @@ logsource:
 detection:
     selection_task_creation:
         EventID: 4698  # Scheduled task created
-        TaskName|regex: '^(?!.*\\Microsoft\\Windows\\).*'  # Exclude Microsoft tasks
+        TaskName|re: '^(?!.*\\Microsoft\\Windows\\).*'  # Exclude Microsoft tasks
     selection_high_privilege_indicators:
         SubjectUserName|endswith: '$'  # Computer account creating task
         TaskContent|contains:
@@ -35,12 +35,11 @@ detection:
             - '\AppData\'
             - '\Users\Public\'
             - '\Temp\'
-            - '\ProgramData\'
             - 'C:\Windows\Tasks'
     selection_immediate_execution:
         TaskContent|contains:
             - '<StartBoundary>'  # Task set to start immediately
-        TaskContent|regex: '<StartBoundary>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
+        TaskContent|re: '<StartBoundary>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
     filter_system_tasks:
         SubjectUserName: 'SYSTEM'
         TaskName|startswith: '\Microsoft\'

@@ -2,9 +2,9 @@ title: Linux OpenSSL Decode Piped to Interpreter
 id: a4b5c6d7-e8f9-497a-d901-567890123456
 status: experimental
 description: |
-  Detects openssl enc/base64 decode patterns piped to shells or interpreters, a common obfuscation and decode-execute chain.
+  Detects openssl enc/base64 decode patterns piped to shells or interpreters, an obfuscation and decode-execute chain.
 author: zendannyy
-date: 2026-04-24
+date: 2026-04-27
 tags:
   - attack.defense-evasion
   - attack.t1027.010

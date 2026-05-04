@@ -1,0 +1,29 @@
+title: Linux Sysctl Kernel Hardening Controls
+id: a9d8c5b7-0e2d-46ae-f28e-7b3e4d2c1a0b
+status: experimental
+description: 
+  - Detects sysctl(8) changes that weaken common kernel execution guardrails, such as ptrace scope, BPF restrictions, dmesg restrictions.
+author: zen
+date: 2026-04-24
+tags:
+  - attack.defense-evasion
+  - attack.t1562.001
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_sysctl:
+    Image|endswith: '/sysctl'
+  selection_hardening_keys:
+    CommandLine|contains:
+      - 'kernel.yama.ptrace_scope'
+      - 'kernel.unprivileged_bpf_disabled'
+      - 'kernel.dmesg_restrict'
+  condition: selection_sysctl and selection_hardening_keys
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Intentional kernel tuning in specialized research or gaming workloads
+level: medium

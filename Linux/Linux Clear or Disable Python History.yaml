@@ -4,6 +4,8 @@ status: experimental
 description: |
   Detects commands that clear interactive shell history or disable history persistence,
   consistent with Defense Evasion (impairing command history visibility).
+reference:
+  https://www.acquisizioniforensi.it/seizelog-technical
 author: zendannyy
 date: 2026-05-01
 tags:
@@ -15,23 +17,19 @@ logsource:
 detection:
   selection_clear_history:
     CommandLine|contains:
-      - 'history -c'
-      - 'history -r'
       - 'cat /dev/null > '
       - ': > '
-      - 'truncate -s 0 '
   selection_histfile_disable:
     CommandLine|contains:
+      - 'export PYTHON_HISTORY=/dev/null'
       - 'unset HISTFILE'
       - 'HISTFILE=/dev/null'
-      - 'HISTFILESIZE=0'
       - 'HISTSIZE=0'
-  selection_histfile_paths:
+  selection_python_histfile:
     CommandLine|contains:
-      - '.bash_history'
-      - '.zsh_history'
+      - '.python_history'
   condition: >-
-    (selection_clear_history and selection_histfile_paths)
+    (selection_clear_history and selection_python_histfile)
     or selection_histfile_disable
 fields:
   - Image

@@ -1,0 +1,35 @@
+title: TeamPCP GitHub Commit Search C2
+id: cb45e958-309d-46dc-918b-3a648d6c0be6
+status: experimental
+description: Detects network requests to the GitHub API containing specific
+  staging and fallback markers (LongLiveTheResistanceAgainstMachines or
+  beautifulcastle) used by TeamPCP in the Bitwarden CLI campaign to retrieve C2 instructions.
+author: zendannyy
+references:
+  - https://research.jfrog.com/post/bitwarden-cli-hijack/
+date: 2026-04-29
+tags:
+  - attack.ta0011
+  - attack.t1102.001
+  - detection.emerging-threats
+logsource:
+  category: proxy
+detection:
+  selection_host:
+    cs-host: 'api.github.com'
+  selection_url:
+    c-uri|contains: 'api.github.com'
+    # Look for known fallback C2 strings and staging markers in the URI
+  selection_markers:
+    c-uri|contains:
+      - 'LongLiveTheResistanceAgainstMachines'
+      - 'beautifulcastle'
+    # Tune out expected internal research or sandbox subnets if false positives occur
+  filter_cidr:
+    c-ip:
+      - 'your_subnet_here' # Placeholder: replace with actual subnets
+  condition: (selection_host or selection_url) and selection_markers and not
+    filter_cidr
+falsepositives:
+  - Security team investigating the campaign.
+level: high

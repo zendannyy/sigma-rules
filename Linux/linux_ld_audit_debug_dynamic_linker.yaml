@@ -1,0 +1,27 @@
+title: Linux LD Audit or LD Debug Dynamic Linker Abuse
+id: e7b6a3f5-8c0b-44ec-d06c-5f1c2b0a9e8f
+status: experimental
+description: Detects processes launched with LD_AUDIT or LD_DEBUG style dynamic linker instrumentation, sometimes used to weaken execution guardrails or enable stealthy code paths.
+author: zen
+date: 2026-04-21
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_env:
+    CommandLine|contains:
+      - 'LD_AUDIT='
+      - 'LD_DEBUG='
+      - 'LD_DEBUG_OUTPUT='
+  condition: selection_env
+fields:
+  - Image
+  - CommandLine
+  - User
+  - ParentCommandLine
+falsepositives:
+  - Rare troubleshooting of dynamic linker issues by administrators
+level: medium
+tags:
+  - attack.defense-evasion
+  - attack.t1574.006

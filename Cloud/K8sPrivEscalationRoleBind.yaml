@@ -1,0 +1,46 @@
+title: K8s Priv Escalation via Role Bindings
+id: 194ea193-6478-4b61-9eef-d514797c63ae
+status: experimental
+description: >
+  Detects activity where there are role bindings and high-risk actions (verbs)
+  applied.
+
+  This could be indicative of Privilege Escalation.
+tags:
+  - attack.t1098.006
+  - attack.privilege.escalation
+  - attack.persistence
+  - container.kubernetes
+author: zendannyy
+references:
+  - https://attack.mitre.org/techniques/T1098/006/
+logsource:
+  product: kubernetes
+  service: audit
+detection:
+  selection_verb_resources:
+    verb:
+      - create
+      - delete
+      - patch
+      - update
+    objectRef.resource:
+      - clusterrolebindings
+      - rolebindings
+      - roles
+  selection_session_status:
+    stage: ResponseComplete
+  selection_prod_namespace:
+    objectRef.namespace:
+      - prod
+      - production
+      - default
+  filter_authorized_users:
+    user.username|startswith:
+      - system:clusterrole-aggregation-controller
+  condition: >-
+    selection_verb_resources and selection_session_status and
+    selection_prod_namespace and not filter_authorized_users
+falsepositives:
+  - Cluster upgrades or automation job during routine deployment, upgrades.
+level: medium

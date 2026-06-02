@@ -1,0 +1,26 @@
+title: Kubernetes Audit Event Deletion
+name: K8sAuditEventDeletion
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+status: experimental
+description: |
+  Detects deletion of Kubernetes events in audit logs when the request completes successfully.
+  Adversaries may delete events to impair defenses and cover tracks (defense evasion).
+tags:
+  - attack.defense-evasion
+  - attack.t1070
+  - container.kubernetes
+author: zendannyy
+references:
+  - https://attack.mitre.org/techniques/T1070/
+logsource:
+  product: kubernetes
+  service: audit
+detection:
+  selection_delete_events:
+    verb: delete
+    objectRef.resource: events
+    stage: ResponseComplete
+  condition: selection_delete_events
+falsepositives:
+  - Automated cluster maintenance or event TTL cleanup
+level: medium

@@ -1,0 +1,19 @@
+title: K8s Audit Event Deletion Correlation
+status: experimental
+tags:
+  - attack.defense.evasion
+  - attack.t1070
+  - container.kubernetes
+description: >
+  Correlation rule that counts the events produced by  Kubernetes Audit Event Deletion base rule
+correlation:
+  type: event_count
+  rules:
+    - K8sAuditEventDeletion
+  group-by:
+    - objectRef.subresource
+    - user.username
+  timespan: 5m
+  condition:
+    gte: 5
+  generate: true

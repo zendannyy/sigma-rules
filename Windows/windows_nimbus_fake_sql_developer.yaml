@@ -1,0 +1,39 @@
+title: Nimbus Manticore Fake SQL Developer SEO Poisoning Download
+id: b1c2d3e4-f5a6-4789-b012-3456789abcde
+status: test
+description: |
+  Detects execution or download activity tied to Nimbus Manticore (UNC1549) SEO
+  poisoning campaign delivering trojanized Oracle SQL Developer from getsqldeveloper.com and
+  related fake Zoom/career portal lures documented alongside Screening Serpens activity.
+tags:
+  - attack.initial-access
+  - attack.t1189
+  - attack.t1566.002
+author: zendannyy
+date: 2026-06-02
+references:
+  - https://labs.cloudsecurityalliance.org/research/csa-research-note-nimbus-manticore-ai-assisted-malware-irgc/
+  - https://unit42.paloaltonetworks.com/tracking-iran-apt-screening-serpens/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_domains:
+    CommandLine|contains:
+      - 'getsqldeveloper.com'
+      - 'docspace-y4cumb.onlyoffice.com'
+      - '2117.filemail.com'
+  selection_lures:
+    CommandLine|contains:
+      - 'sqldeveloper'
+      - 'SQL Developer'
+      - 'ZoomInstaller'
+      - 'setup.exe.config'
+  condition: selection_domains or selection_lures
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Users downloading legitimate Oracle SQL Developer from official oracle.com sources
+level: medium

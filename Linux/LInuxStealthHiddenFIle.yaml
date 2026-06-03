@@ -1,0 +1,63 @@
+title: Hidden File Created On Linux Host
+id: 8f3c2a1b-6d4e-4f90-9c2a-1b7e5d4f3a20
+status: experimental
+description: |
+  Detects creation of hidden files or files under hidden directories on Linux hosts
+  (path segment starting with /.). Shell-related processes are required.
+  Apply additional tuning for your environment to reduce false positives.
+author: zendannyy
+date: 2026-06-01
+references:
+  - https://attack.mitre.org/techniques/T1564/001/
+  - https://www.aquasec.com/blog/ai-generated-malware-in-panda-image-hides-persistent-linux-threat/
+  - https://hunt.io/blog/apt36-india-infrastructure-attacks
+  - https://www.cyfirma.com/research/apt36-python-based-elf-malware-targeting-indian-government-entities/
+  - https://www.trendmicro.com/en_us/research/25/l/ghostpenguin.html
+tags:
+  - attack.defense-evasion
+  - attack.t1564.001
+logsource:
+  product: linux
+  category: file_event
+detection:
+  selection_shell:
+    Image|endswith:
+      - '/sh'
+      - '/bash'
+      - '/dash'
+      - '/zsh'
+      - '/ksh'
+  selection_hidden_path:
+    TargetFilename|contains: '/.'
+  filter_known_paths:
+    TargetFilename|contains:
+      - 'gpghome'
+      - 'Homebrew'
+      - '.local/lib/python'
+      - '/react-dropzone'
+      - '/pre-commit'
+      - 'venv'
+      - 'pyenv'
+      - 'Vmware'
+      - 'VirtualBox'
+      - 'Microsoft'
+      - '.thnumod'
+      - '.devcontainer'
+      - '.PKInstallSandboxManager'
+      - '.cache'
+      - 'Helpers/'
+      - '.condatmp'
+      - '/.git/'
+      - '/.vscode-server/'
+      - 'com_ibm_tools_attach/'
+      - '/.ansible/tmp'
+      - '/tmp/.org.chromium'
+  condition: selection_shell and selection_hidden_path and not filter_known_paths
+falsepositives:
+  - Package managers, IDEs, and CI tooling writing dotfiles under home or project directories
+level: low
+fields:
+  - Image
+  - TargetFilename
+  - User
+  - ProcessName

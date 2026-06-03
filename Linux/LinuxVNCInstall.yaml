@@ -1,6 +1,6 @@
 title: Linux VNC Install
 id: 6b41c0da-918a-4283-a3a1-89c13a3a5757
-status: experimental
+status: test
 description: Detects VNC-based lateral movement activities. Looking for the initial install
 references:
     - https://attack.mitre.org/techniques/T1021/005/

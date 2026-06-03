@@ -1,0 +1,54 @@
+title: ShadowRay 2.0 Ray Cluster Job Abuse and Cryptominer Staging
+id: 18c9d0e1-f2a3-4456-b789-abcdef012345
+status: experimental
+description: |
+  Detects ShadowRay 2.0 campaign activity abusing exposed Ray dashboards: OAST callback jobs,
+  cluster-wide node scheduling payloads, and process masquerading as kworker/dns-filter.
+author: zen
+date: 2026-06-02
+level: high
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - attack.execution
+  - attack.t1059.006
+  - attack.t1053.003
+  - attack.defense-evasion
+  - attack.t1036.005
+  - attack.impact
+  - attack.t1496
+references:
+  - https://www.oligo.security/blog/shadowray-2-0-attackers-turn-ai-against-itself-in-global-campaign-that-hijacks-ai-into-self-propagating-botnet
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_ray_api:
+    CommandLine|contains:
+      - '/api/jobs/'
+      - 'ray.nodes()'
+      - 'NodeAffinitySchedulingStrategy'
+  selection_oast:
+    CommandLine|contains:
+      - 'oast.fun'
+      - 'interact.sh'
+  selection_masquerade:
+    CommandLine|contains:
+      - 'curl -X'
+      - 'dns-filter'
+      - '/usr/lib/dev/systemdev'
+      - 'kworker/0:0'
+      - 'health-monitor'
+      - 'custom-X-service'
+  selection_competition:
+    CommandLine|contains:
+      - 'supportxmr.com'
+      - 'pool.minexmr.com'
+  condition: selection_ray_api or selection_oast or selection_masquerade or selection_competition
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Ray operators legitimately submitting cluster jobs; tune for internet-exposed dashboards
+

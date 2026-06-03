@@ -1,0 +1,43 @@
+title: Linux ptrace Attach to Non-Child Process
+id: 2a9f3e67-1c4b-4d82-ae31-f7c3b2d91a56
+status: experimental
+description: >
+  Detects use of ptrace PTRACE_ATTACH or PTRACE_SEIZE against a process that
+  is not a child of the calling process. Legitimate uses of ptrace (debuggers,
+  strace) typically operate on child processes they spawned. This process injection 
+  or credential harvesting has been used by NoodleRAT, SSHdInjector, and QLNX.
+author: zendannyy
+date: 2025-06-02
+references:
+  - https://unit42.paloaltonetworks.com/elf-based-malware-targets-cloud/
+tags:
+  - attack.defense_evasion
+  - attack.privilege_escalation
+  - attack.t1055.008
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+      - 'ptrace'
+      - 'PTRACE_ATTACH'
+      - 'PTRACE_SEIZE'
+  filter_legit_debuggers:
+    Image|endswith:
+      - '/gdb'
+      - '/lldb'
+      - '/strace'
+      - '/ltrace'
+      - '/perf'
+  condition: selection and not filter_legit_debuggers
+falsepositives:
+  - Security tooling and sandboxes
+  - Java JVM crash handlers (attach mechanism)
+level: high
+fields:
+  - User
+  - Image
+  - CommandLine
+  - ParentImage
+  - ParentCommandLine

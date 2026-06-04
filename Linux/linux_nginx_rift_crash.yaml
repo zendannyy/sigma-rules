@@ -1,0 +1,38 @@
+title: NGINX Rift CVE-2026-42945 Worker Segfault Pattern
+id: 8f901234-5678-4901-f234-567890abcdef
+status: experimental
+description: |
+  Detects error-log indicators of active CVE-2026-42945 (NGINX Rift) exploitation attempts
+  reported from May 2026: worker processes exiting on signal 11 after crafted requests against
+  vulnerable rewrite configurations. Pair with access-log URI anomaly rules on internet-facing NGINX.
+author: zen
+date: 2026-06-02
+references:
+  - https://www.decryptiondigest.com/blog/nginx-rift-cve-2026-42945-unauthenticated-rce
+  - https://vulert.com/blog/nginx-cve-2026-42945-exploited-worker-crashes-rce/
+  - https://op-c.net/blog/cve-2026-42945-nginx-rewrite-module-vulnerability/
+logsource:
+  product: linux
+  service: nginx
+  definition: NGINX error logs on Linux hosts
+detection:
+  selection:
+    message|contains|all:
+      - 'worker process'
+      - 'exited signal 11'
+  selection_alt:
+    message|contains:
+      - 'exited on signal 11'
+      - 'SIGSEGV'
+  condition: selection or selection_alt
+fields:
+  - message
+  - source_ip
+falsepositives:
+  - Transient NGINX worker crashes from misconfiguration or resource exhaustion
+level: medium
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - attack.impact
+  - attack.t1499

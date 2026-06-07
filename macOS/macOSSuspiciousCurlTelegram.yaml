@@ -1,0 +1,28 @@
+title: macOS Suspicious curl from Telegram
+id: 122d56dc-1fb1-4074-8b03-048949136c33
+status: test
+description: Detects the use of curl to download files from Telegram to local temp folder, which may indicate initial malware staging.
+reference:
+  - https://securityaffairs.com/189820/malware/iran-linked-actors-use-telegram-as-c2-in-malware-attacks-on-dissidents.html
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection_downloads:
+    Image|endswith: '\curl'
+    CommandLine|contains:
+      - 'api.telegram.org/s/'
+      - 'telegram.me/s/'
+      - '-o'
+      - '~/Downloads'
+  selection_temp:
+    Image|endswith: '\curl'
+    CommandLine|contains:
+      - 'api.telegram.org/s/'
+      - 'telegram.me/s/'
+      - '-o'
+      - '/tmp'
+  condition: selection_downloads or selection_temp
+falsepositives:
+  - Unknown use case for curling from Telegram.
+level: high

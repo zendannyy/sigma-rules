@@ -1,0 +1,21 @@
+title: Suspicious curl Download from Telegram
+id: f405299f-bd4a-48e4-8a34-b1d9f117e166
+status: test
+description: Detects the use of curl to download files from Telegram to local temp folder, which may indicate initial malware staging.
+reference:
+  - https://securityaffairs.com/189820/malware/iran-linked-actors-use-telegram-as-c2-in-malware-attacks-on-dissidents.html
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\curl.exe'
+    CommandLine|contains:
+      - 'api.telegram.org/s/'
+      - 'telegram.me/s/'
+      - '-o'
+      - '\AppData\Local\Temp\'
+  condition: selection
+falsepositives:
+  - Unknown use case for curling from Telegram.
+level: high

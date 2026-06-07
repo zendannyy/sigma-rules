@@ -1,0 +1,30 @@
+title: macOS Hidden User - dscl Delete Followed by Create on Same User
+id: 8f1a2b3c-0004-4d5e-9f0a-aaaaaaaaaaaa
+status: experimental
+description: 
+  - Detects delete/create sequences on the same /Users/ path within a short time window.
+references:
+  - https://attack.mitre.org/techniques/T1564/002/
+tags:
+  - attack.defense_evasion
+  - attack.t1564.002
+  - attack.persistence
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection_delete:
+    Image|endswith: '/dscl'
+    CommandLine|contains|all:
+      - '-delete'
+      - '/Users/'
+  selection_create:
+    Image|endswith: '/dscl'
+    CommandLine|contains|all:
+      - '-create'
+      - '/Users/'
+  timeframe: 5m
+  condition: selection_delete and selection_create
+falsepositives:
+  - Account repair scripts during onboarding/offboarding
+level: medium

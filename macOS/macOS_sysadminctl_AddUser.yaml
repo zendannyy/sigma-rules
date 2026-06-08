@@ -1,0 +1,33 @@
+title: macOS Hidden User - sysadminctl Add Local User Account
+id: a1b2c3d4-0009-4e5f-8a9b-111111111109
+status: experimental
+description: |
+  Detects local account creation via sysadminctl, frequently chained with hidden user
+  attribute changes related to T1564.002 persistence chains.
+author: zendannyy
+date: 2026-06-06
+references:
+  - https://attack.mitre.org/techniques/T1564/002/
+  - https://attack.mitre.org/techniques/T1136/001/
+tags:
+  - attack.defense-evasion
+  - attack.t1564.002
+  - attack.persistence
+  - attack.t1136.001
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '/sysadminctl'
+    CommandLine|contains:
+      - 'addUser'
+      - '-addUser'
+  condition: selection
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - MDM enrollment, Jamf policies, and onboarding scripts
+level: low

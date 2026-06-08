@@ -1,0 +1,68 @@
+title: AWS STS AssumeRole Cross-Account Session
+id: b7e4a1c2-4001-4a5f-9c3d-dddddddd0001
+status: experimental
+description: |
+  Detects high-risk AWS STS role assumption activity beyond simple user-agent allowlisting.
+
+  Fires when a successful AssumeRole-family API call matches one or more risk indicators:
+  long-term IAM user credentials, privileged/cross-account role targets, and not having used MFA for its operations.
+
+    Possible Use Cases
+    - Spike in AccessDenied AssumeRole followed by success (role enumeration)
+    - AssumeRole into account B where issuer account != role account (cross-account pivot)
+    - CloudTrail Lake: correlate AssumeRole with sensitive APIs (iam:*, s3:ListBuckets, etc.)
+    - requestParameters.externalId missing on roles that require it in trust policy
+    - New MFA device serialNumber (requestParameters.serialNumber) on privileged roles
+
+author: zendannyy
+date: 2026-06-08
+references:
+  - https://attack.mitre.org/techniques/T1078/004/
+  - https://attack.mitre.org/techniques/T1550/001/
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/cloudtrail-integration.html
+tags:
+  - attack.defense-evasion
+  - attack.t1078.004
+  - attack.lateral-movement
+  - attack.t1550.001
+logsource:
+  product: aws
+  service: cloudtrail
+detection:
+  selection_base:
+    eventSource: 'sts.amazonaws.com'
+    eventName:
+      - 'AssumeRole'
+      - 'AssumeRoleWithSAML'
+      - 'AssumeRoleWithWebIdentity'
+
+  selection_cross_account_pivot:
+    requestParameters.roleArn|contains:
+      - ':role/CrossAccount'
+      - ':role/cross-account'
+      - ':role/External'
+  selection_mfa_not_authenticated:
+    userIdentity.sessionContext.attributes.mfaAuthenticated: 'false'
+  filter_known_automation:
+    userAgent|contains:
+      - 'aws-cli'
+      - 'aws-sdk'
+      - 'boto3'
+      - 'Botocore'
+      - 'Terraform'
+      - 'pulumi'
+      - 'Jenkins'
+      - 'GitHubActions'
+      - 'GitLab'
+      - 'Spinnaker'
+  filter_aws_service_invocation:
+    userIdentity.invokedBy|contains:
+      - 'AWS Internal'
+      - '.amazonaws.com'
+  filter_console:
+    sourceIPAddress: 'AWS Internal'
+    userAgent|contains: 'console.amazonaws.com'
+  condition: >-
+    selection_base and not filter_*
+    and 1 of selection_cross_account_pivot, selection_mfa_not_authenticated
+  

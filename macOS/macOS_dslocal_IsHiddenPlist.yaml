@@ -1,0 +1,30 @@
+title: macOS Hidden User - dslocal User Plist IsHidden
+id: a1b2c3d4-0005-4e5f-8a9b-111111111105
+status: experimental
+description: |
+  Monitors dslocal user plist modifications for IsHidden, indicating a concealed local account
+  created or modified outside standard account management workflows.
+author: zendannyy
+date: 2026-06-06
+references:
+  - https://attack.mitre.org/techniques/T1564/002/
+tags:
+  - attack.defense_evasion
+  - attack.t1564.002
+logsource:
+  product: macos
+  category: file_event
+detection:
+  selection:
+    TargetFilename|startswith: '/var/db/dslocal/nodes/Default/users/'
+    TargetFilename|endswith: '.plist'
+  keywords:
+    - '<key>IsHidden</key>'
+    - '<integer>1</integer>'
+  condition: selection
+fields:
+  - TargetFilename
+  - User
+falsepositives:
+  - Minimal on end-user Macs; more common on managed servers
+level: high

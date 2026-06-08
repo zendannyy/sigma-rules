@@ -1,0 +1,35 @@
+title: Azure AD Privileged Role Assigned to User or Service Principal
+id: b7e4a1c2-4002-4a5f-9c3d-dddddddd0002
+status: experimental
+description: |
+  Detects assignment of highly privileged directory roles in Azure AD, including
+  Global Administrator and Privileged Role Administrator.
+author: zendannyy
+date: 2026-06-06
+references:
+  - https://attack.mitre.org/techniques/T1098/003/
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - attack.t1098.003
+logsource:
+  product: azure
+  service: auditlogs
+detection:
+  selection:
+    Category: 'RoleManagement'
+    OperationName|contains: 'Add member to role'
+  selection_roles:
+    TargetResources.modifiedProperties.newValue|contains:
+      - 'Global Administrator'
+      - 'Privileged Role Administrator'
+      - 'Security Administrator'
+  condition: selection and selection_roles
+fields:
+  - InitiatedBy.user.userPrincipalName
+  - TargetResources.userPrincipalName
+  - OperationName
+falsepositives:
+  - Planned IAM changes during onboarding and break-glass procedures
+  - This will need some filtering for approved IAM list
+level: high

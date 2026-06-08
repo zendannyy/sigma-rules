@@ -1,0 +1,131 @@
+title: macOS Hidden User - Hunt for Local User UID Between 100 and 499
+id: a1b2c3d4-0010-4e5f-8a9b-111111111110
+status: experimental
+description: |
+  Identifies non-system local users in the sub-500 UID range used to hide accounts from
+  the login UI. Intended for osquery scheduled inventory or EDR user-account telemetry.
+author: zendannyy
+date: 2026-06-06
+references:
+  - https://attack.mitre.org/techniques/T1564/002/
+tags:
+  - attack.defense_evasion
+  - attack.t1564.002
+logsource:
+  product: macos
+  service: osquery
+detection:
+  selection:
+    uid|gt: 99
+    uid|lt: 500
+  filter_system:
+    username|startswith: '_'
+  filter_known:
+    username:
+      - '_amavisd'
+      - '_appleevents'
+      - '_applepay'
+      - '_appowner'
+      - '_appserver'
+      - '_ard'
+      - '_assetcache'
+      - '_astris'
+      - '_atsserver'
+      - '_avbdeviced'
+      - '_calendar'
+      - '_captiveagent'
+      - '_ces'
+      - '_clamav'
+      - '_coreaudiod'
+      - '_coremediaiod'
+      - '_coreml'
+      - '_ctkd'
+      - '_cvmsroot'
+      - '_cvs'
+      - '_cyrus'
+      - '_datadetectors'
+      - '_devdocs'
+      - '_devicemgr'
+      - '_displaypolicyd'
+      - '_distnote'
+      - '_dovecot'
+      - '_dpaudio'
+      - '_driverkit'
+      - '_eppc'
+      - '_findmydevice'
+      - '_fpsd'
+      - '_ftp'
+      - '_gamecontrollerd'
+      - '_geod'
+      - '_hidd'
+      - '_iconservices'
+      - '_installassistant'
+      - '_installcoordinationd'
+      - '_installer'
+      - '_jabber'
+      - '_kadmin_admin'
+      - '_kadmin_changepw'
+      - '_krb_anonymous'
+      - '_krb_changepw'
+      - '_krb_kadmin'
+      - '_krb_kerberos'
+      - '_krb_krbtgt'
+      - '_krbfast'
+      - '_krbtgt'
+      - '_launchservicesd'
+      - '_locationd'
+      - '_logd'
+      - '_lp'
+      - '_mailman'
+      - '_mbsetupuser'
+      - '_mcxalr'
+      - '_mdnsresponder'
+      - '_mobileasset'
+      - '_mysql'
+      - '_nearbyd'
+      - '_netbios'
+      - '_netstatistics'
+      - '_networkd'
+      - '_nsurlsessiond'
+      - '_nsurlstoraged'
+      - '_oahd'
+      - '_ondemand'
+      - '_postfix'
+      - '_postgres'
+      - '_qtss'
+      - '_reportmemoryexception'
+      - '_rmd'
+      - '_sandbox'
+      - '_screensaver'
+      - '_scsd'
+      - '_securityagent'
+      - '_softwareupdate'
+      - '_spotlight'
+      - '_sshd'
+      - '_svn'
+      - '_taskgated'
+      - '_teamsserver'
+      - '_timed'
+      - '_timezone'
+      - '_tokend'
+      - '_trustd'
+      - '_trustevaluationagent'
+      - '_unknown'
+      - '_update_sharing'
+      - '_usbmuxd'
+      - '_uucp'
+      - '_warmd'
+      - '_webauthserver'
+      - '_windowserver'
+      - '_www'
+      - '_wwwproxy'
+      - '_xserverdocs'
+  condition: selection and not 1 of filter_*
+fields:
+  - username
+  - uid
+  - directory
+  - shell
+falsepositives:
+  - Custom service accounts intentionally using low UIDs
+level: high

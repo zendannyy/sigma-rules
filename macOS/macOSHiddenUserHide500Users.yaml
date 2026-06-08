@@ -1,16 +1,19 @@
 title: macOS Hidden User - Hide500Users Enabled in loginwindow Plist
 id: 8f1a2b3c-0006-4d5e-9f0a-aaaaaaaaaaaa
 status: experimental
-description: Detects enabling Hide500Users, which suppresses sub-500 UID accounts from the login screen, and System Preferences.
+description: |
+  Detects enabling Hide500Users in com.apple.loginwindow preferences, which suppresses
+  sub-500 UID accounts from the login screen and System Settings.
 author: zendannyy
+date: 2026-06-06
 references:
   - https://attack.mitre.org/techniques/T1564/002/
 tags:
   - attack.defense_evasion
   - attack.t1564.002
 logsource:
-  category: file_event
   product: macos
+  category: file_event
 detection:
   selection:
     TargetFilename|endswith: '/Library/Preferences/com.apple.loginwindow.plist'
@@ -18,6 +21,9 @@ detection:
     - 'Hide500Users'
     - '<true/>'
   condition: selection
+fields:
+  - TargetFilename
+  - User
 falsepositives:
-  - Some enterprise hardening baselines on shared/kiosk systems
+  - Some enterprise hardening baselines on shared or kiosk systems
 level: medium

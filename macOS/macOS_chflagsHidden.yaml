@@ -1,21 +1,30 @@
 title: macOS Hidden User - chflags Hidden Applied to User Home Directory
 id: 76aa8488-6e6c-4f18-8a50-b4e826827caf
 status: experimental
-description: Detects hiding a user home folder with chflags, complementing account-level hiding.
+description: |
+  Detects hiding a user home folder with chflags, complementing account-level hiding
+  documented in T1564.002.
+author: zendannyy
+date: 2026-06-06
 references:
   - https://attack.mitre.org/techniques/T1564/002/
 tags:
   - attack.defense_evasion
   - attack.t1564.002
 logsource:
-  category: process_creation
   product: macos
+  category: process_creation
 detection:
   selection:
     Image|endswith: '/chflags'
-    CommandLine|contains: 'hidden'
-    CommandLine|contains: '/Users/'
+    CommandLine|contains|all:
+      - 'hidden'
+      - '/Users/'
   condition: selection
+fields:
+  - Image
+  - CommandLine
+  - User
 falsepositives:
   - User or admin manually hiding personal folders in Finder
-level: medium
+level: low

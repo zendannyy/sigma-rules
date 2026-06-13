@@ -1,0 +1,36 @@
+title: Windows Registry Run Key Persistence Modification
+id: b7e4a1c2-1001-4a5f-9c3d-aaaaaaaa0001
+status: experimental
+description: |
+  Detects modification of targeted registry keys commonly used for persistence
+  and defense evasion via startup execution.
+author: zendannyy
+date: 2026-06-06
+references:
+  - https://attack.mitre.org/techniques/T1547/001/
+tags:
+  - attack.persistence
+  - attack.t1547.001
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith:
+      - '\reg.exe'
+      - '\powershell.exe'
+      - '\pwsh.exe'
+    CommandLine|contains:
+      - 'Software\Microsoft\Windows\CurrentVersion\Run'
+      - 'Software\Microsoft\Windows\CurrentVersion\RunOnce'
+      - 'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+      - 'Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+  condition: selection
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Software installers with legitimate startup configuration needs
+level: medium

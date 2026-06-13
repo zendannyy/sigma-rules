@@ -1,0 +1,30 @@
+title: Windows AgentExecutor (LOLBAS) Abuse
+id: 480e8cd6-5cae-4a0a-bbbb-2e22d6e124e4
+status: test
+description: Detects abuse of legitimate Windows binary AgentExecutor.exe, executing powershell scripts. Correlation rule
+references:
+    - https://lolbas-project.github.io/
+author: zendannyy
+date: 2026/06/11
+tags:
+    - attack.defense-evasion
+    - attack.execution
+    - attack.t1218
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_susp_command:
+        CommandLine|contains:
+            - 'powershell'
+            - 'pwsh'
+    selection_Agent:
+        Image|endswith: '\AgentExecutor.exe'
+    filter_legitimate_command:
+        CommandLine|contains:
+            - 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\'
+            - 'C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\'
+    condition: any of selection* and not filter_legitimate_command
+falsepositives:
+    - Administrative scripts interacting with these binaries
+level: medium

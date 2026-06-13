@@ -1,0 +1,30 @@
+title: AWS Root Usage
+id: b7e4a1c2-4001-4a5f-9c3d-dddddddd0001
+status: experimental
+description: |
+  Detects high-risk action of the account Root user being used.
+
+  AWS Best practices highly recommend to not use the Root account for day to day operations, and use IAM roles whenever possible.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1098/001/
+  - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html
+tags:
+  - attack.privilege-escalation
+  - attack.t1098.001
+logsource:
+  product: aws
+  service: cloudtrail
+detection:
+  selection_base:
+    eventSource: 'iam.amazonaws.com'
+    eventName:
+      - 'AssumeRole'
+      - 'AssumeRoleWithSAML'
+      - 'AssumeRoleWithWebIdentity'
+  selection_root:
+    userIdentity: 'Root'
+  condition: >-
+    selection_base and selection_root
+  

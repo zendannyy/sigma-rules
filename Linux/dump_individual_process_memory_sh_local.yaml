@@ -1,0 +1,33 @@
+title: T1003.007 Dump individual process memory with sh (Local)
+id: d93b22f6-5128-9849-607f-e0c85be150a0
+status: experimental
+description: |
+  Auto-generated daily rule from Atomic Red Team T1003.007 test "Dump individual process memory with sh (Local)".
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1003/007/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1003.007
+tags:
+  - attack.execution
+  - attack.t1003.007
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_shell_parent:
+    Image|endswith:
+      - '/bash'
+      - '/sh'
+      - '/zsh'
+  selection:
+    CommandLine|endswith: '/PID=$(pgrep'
+    CommandLine|endswith: '/HEAP_MEM=$(grep'
+  condition: selection
+fields:
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Requires manual review after auto-generation
+level: low

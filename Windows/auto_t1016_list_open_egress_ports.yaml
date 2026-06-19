@@ -1,0 +1,32 @@
+title: Windows Outbound Port Scan via TcpClient allports.exposed
+id: 7e35c763-4fd7-353f-dfe1-5428744424c3
+status: experimental
+description: |
+  Detects ART-style egress port probing using TcpClient against allports.exposed.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1016/
+  - https://allports.exposed/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1016
+tags:
+  - attack.discovery
+  - attack.t1016
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+      - 'allports.exposed'
+      - 'TcpClient'
+      - 'BeginConnect'
+  condition: selection
+fields:
+  - CommandLine
+  - User
+  - ParentImage
+  - Image
+falsepositives:
+  - Authorized egress testing from security teams
+level: high

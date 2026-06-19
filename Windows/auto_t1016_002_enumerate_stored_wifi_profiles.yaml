@@ -1,0 +1,33 @@
+title: Windows Enumerate Stored Wi-Fi Profiles And Passwords via netsh (T1016.002)
+id: 53a41fe5-08ce-4945-c44e-9ceedfd15244
+status: experimental
+description: |
+  Detects Enumerating Stored Wi-Fi Profiles And Passwords via netsh (System Network Configuration Discovery: Wi-Fi Discovery) using command-line and process indicators derived from executor behavior.
+author: zendannyy
+date: 2026-06-13
+references:
+  - https://attack.mitre.org/techniques/T1016/002/
+  - https://hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html#wifi
+tags:
+  - attack.discovery
+  - attack.t1016.002
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\\netsh.exe'
+    CommandLine|contains|all:
+      - 'netsh wlan'
+      - 'key=clear'
+      - 'profile'
+  condition: selection
+fields:
+  - Image
+  - CommandLine
+  - User
+  - ParentImage
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Tune or disable if overlapping with approved admin tooling
+level: low

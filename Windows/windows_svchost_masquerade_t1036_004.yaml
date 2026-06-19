@@ -1,0 +1,52 @@
+title: Windows Svchost Masquerading or Suspicious Parent Spawn
+id: b9e4d3f2-0c5e-5f7b-9a2d-3e8f6c0b1d4e
+status: experimental
+description: |
+  Detects svchost.exe masquerading or abnormal process lineage. Legitimate svchost.exe
+  runs from System32 or SysWOW64 and is launched by services.exe as the Service Control
+  Manager host process. Execution from user-writable paths indicates binary masquerading;
+  execution from script hosts or explorer indicates a rogue or attacker-controlled launch
+  rather than normal service startup.
+author: zendannyy
+date: 2026-06-13
+references:
+  - https://attack.mitre.org/techniques/T1036/004/
+  - https://www.splunk.com/en_us/blog/security/inno-setup-malware-redline-stealer-campaign.html
+  - https://asec.ahnlab.com/en/39828/
+  - https://nasbench.medium.com/demystifying-the-svchost-exe-process-and-its-command-line-options-508e9114e747
+tags:
+  - attack.defense_evasion
+  - attack.t1036.004
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_svchost_wrong_parent:
+    Image|endswith: '\\svchost.exe'
+    Image|startswith:
+      - 'C:\\Windows\\System32\\'
+      - 'C:\\Windows\\SysWOW64\\'
+    ParentImage|endswith:
+      - '\\cmd.exe'
+      - '\\powershell.exe'
+      - '\\pwsh.exe'
+      - '\\wscript.exe'
+      - '\\mshta.exe'
+      - '\\explorer.exe'
+  selection_svchost_masquerade:
+    Image|endswith: '\\svchost.exe'
+    Image|contains:
+      - ':\\Users\\'
+      - ':\\Temp\\'
+      - ':\\Windows\\Temp\\'
+      - ':\\ProgramData\\'
+      - ':\\PerfLogs\\'
+  condition: 2 of selection_svchost_*
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Rare misconfigured or legacy installers launching service binaries from atypical parents
+level: high

@@ -1,0 +1,33 @@
+title: Hunt - Windows Changing RDP Port to Non Standard Port via Powershell (T1021.001)
+id: b2cdd450-ccc0-78d2-afab-4816fee68f8c
+status: experimental
+description: |
+  Hunting rule for T1021.001 test "Changing RDP Port to Non Standard Port via Powershell" (Remote Services: Remote Desktop Protocol) using command-line and process indicators derived from executor behavior.
+author: zendannyy
+date: 2026-06-15
+references:
+  - https://attack.mitre.org/techniques/T1021/001/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1021
+tags:
+  - attack.lateral_movement
+  - attack.t1021.001
+  - attack.hunting
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains|all:
+      - 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal'
+      - 'New-NetFirewallRule -DisplayName'
+      - 'Server\WinStations\RDP-Tcp'
+  condition: selection
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Tune or disable if overlapping with approved admin tooling
+level: informational

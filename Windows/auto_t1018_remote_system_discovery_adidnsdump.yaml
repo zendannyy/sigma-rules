@@ -1,0 +1,32 @@
+title: Windows Remote System Discovery - adidnsdump (T1018)
+id: 101c60a0-7d4b-fb35-3e0c-0c2f49b1c595
+status: experimental
+description: |
+  Based off of Atomic Red Team T1018 test "Remote System Discovery - adidnsdump" (Remote System Discovery) using command-line and process indicators derived from executor behavior.
+author: zendannyy
+date: 2026-06-13
+references:
+  - https://attack.mitre.org/techniques/T1018/
+  - https://github.com/dirkjanm/adidnsdump
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1018
+tags:
+  - attack.execution
+  - attack.t1018
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains|all:
+      - '\Scripts\adidnsdump" -u'
+      - '-print-zones'
+  condition: selection
+fields:
+  - Image
+  - CommandLine
+  - User
+  - ParentImage
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Tune or disable if overlapping with approved admin tooling
+level: medium

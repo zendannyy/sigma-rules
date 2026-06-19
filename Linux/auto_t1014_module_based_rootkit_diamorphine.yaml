@@ -1,0 +1,35 @@
+title: Linux Diamorphine Rootkit Module Load and Hide Signal
+id: b48b7d4f-9bdb-9fac-338b-e17ca4f6acc6
+status: experimental
+description: |
+  Detects diamorphine rootkit modprobe with kill -31 process hide signal usage.
+author: zendannyy
+date: 2026-06-12
+references:
+  - https://attack.mitre.org/techniques/T1014/
+  - https://github.com/m0nad/Diamorphine
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1014
+tags:
+  - attack.defense_evasion
+  - attack.t1014
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_modprobe:
+    CommandLine|contains: 'modprobe diamorphine'
+  selection_kill_signal_1:
+    Image|endswith: '/kill'
+    CommandLine|contains: '-31'
+  selection_kill_signal_2:
+    Image|endswith: '/kill'
+    CommandLine|contains: '-63'
+  condition: selection_modprobe and 1 of selection_kill_*
+fields:
+  - CommandLine
+  - User
+  - ParentImage
+  - Image
+falsepositives:
+  - Security research environments
+level: high

@@ -1,0 +1,33 @@
+title: Linux Rootkit via ld.so.preload Modification
+id: 90d95e60-0855-e59b-ee1b-221966dafaad
+status: experimental
+description: |
+  Detects appending shared library path to /etc/ld.so.preload — libprocesshider-style rootkit persistence.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1014/
+  - https://github.com/gianlucaborello/libprocesshider
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1014
+tags:
+  - attack.defense_evasion
+  - attack.t1014
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains: '/etc/ld.so.preload'
+    CommandLine|contains:
+      - 'tee'
+      - 'echo'
+      - '>>'
+  condition: selection
+fields:
+  - CommandLine
+  - User
+  - ParentImage
+  - Image
+falsepositives:
+  - Legacy application LD_PRELOAD requirements misconfigured globally
+level: critical

@@ -1,0 +1,31 @@
+title: Linux Rootkit Kernel Module Loaded via insmod
+id: 567e2ce2-ba9b-731e-9c11-b53b220f45c6
+status: experimental
+description: |
+  Detects manual insmod of kernel object from non-standard path outside package management.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1014/
+  - https://gtfobins.github.io/gtfobins/insmod/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1014
+tags:
+  - attack.defense_evasion
+  - attack.t1014
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '/insmod'
+  filter_path:
+    CommandLine|contains: '/lib/modules/'
+  condition: selection and not filter_path
+fields:
+  - Image
+  - CommandLine
+  - User
+  - ParentImage
+falsepositives:
+  - Out-of-tree driver development on engineering hosts
+level: high

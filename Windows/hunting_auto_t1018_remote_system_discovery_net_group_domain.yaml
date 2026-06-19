@@ -1,0 +1,49 @@
+title: Hunt: AD Domain Computers Enumeration via net group (T1018)
+id: 6f38cc15-6372-e8d1-8c4c-5177dd3090ff
+status: experimental
+description: |
+  Hunting rule for enumeration of the Active Directory "Domain Computers" group via net.exe.
+  Attackers use this to list domain-joined hosts before lateral movement; the same command is
+  also run by domain admins and RSAT tooling, so treat hits as leads.
+  Prioritize when the source is a workstation, or the
+  event appears in a chain with other discovery (nltest, net view /domain, adidnsdump).
+author: zendannyy
+date: 2026-06-13
+references:
+  - https://attack.mitre.org/techniques/T1018/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1018
+  - https://findingbad.blogspot.de/2017/01/hunting-what-does-it-look-like.html
+  - https://hacktricks.wiki/en/windows-hardening/basic-cmd-for-pentesters.html
+tags:
+  - attack.discovery
+  - attack.t1018
+  - attack.hunting
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith:
+      - '\\net.exe'
+      - '\\net1.exe'
+    CommandLine|contains|all:
+      - 'net group'
+      - 'Domain Computers'
+      - '/domain'
+  filter_modify:
+    CommandLine|contains:
+      - ' /add'
+      - ' /delete'
+  filter_ad_console:
+    ParentImage|endswith:
+      - '\\mmc.exe'
+  condition: selection and not 1 of filter_*
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Domain administrators enumerating AD group membership via cmd or RSAT
+  - Helpdesk troubleshooting domain-join issues
+level: informational

@@ -1,0 +1,33 @@
+title: Hunt: Windows Execute base64-encoded PowerShell (T1027)
+id: 4b490103-abd3-1fe2-dfac-059835fbf406
+status: experimental
+description: |
+  Hunting rule for Atomic Red Team T1027 test "Execute base64-encoded PowerShell" (Obfuscated Files or Information) using command-line and process indicators derived from executor behavior.
+author: zendannyy
+date: 2026-06-15
+references:
+  - https://attack.mitre.org/techniques/T1027/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1027
+tags:
+  - attack.execution
+  - attack.t1027
+  - attack.hunting
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains|all:
+      - '[System.Text.Encoding]::Unicode.GetBytes($OriginalCommand)'
+      - '$EncodedCommand =[Convert]::ToBase64String($Bytes)'
+      - 'powershell.exe -EncodedCommand'
+  condition: selection
+fields:
+  - CommandLine
+  - User
+  - ParentImage
+  - Image
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Tune or disable if overlapping with approved admin tooling
+level: test

@@ -1,0 +1,31 @@
+title: macOS Apple Notes Database Copied via AppleScript
+id: 6bce7fb1-a629-9ca0-7f4d-c55574f54f1f
+status: experimental
+description: |
+  Detects AppleScript duplication of NoteStore.sqlite files from Notes group container.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1005/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1005
+tags:
+  - attack.collection
+  - attack.t1005
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '/osascript'
+    CommandLine|contains|all:
+      - 'NoteStore.sqlite'
+      - 'group.com.apple.notes'
+  condition: selection
+fields:
+  - CommandLine
+  - User
+  - ParentImage
+  - Image
+falsepositives:
+  - User-initiated Notes backup automation
+level: high

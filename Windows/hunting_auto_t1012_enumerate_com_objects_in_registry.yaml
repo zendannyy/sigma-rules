@@ -1,0 +1,32 @@
+title: Hunt - Windows COM Object Instantiation from Registry CLSID
+id: e08b8869-1f53-4cdf-26c0-c6ae11ecf1c5
+status: experimental
+description: |
+  Hunting rule — correlate with additional signals before alerting.
+  Detects dynamic COM activation from HKCR CLSID enumeration — common in COM-based execution chains.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1012/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1012
+tags:
+  - attack.discovery
+  - attack.t1012
+  - attack.hunting
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains|all:
+      - 'HKCR:\CLSID'
+      - 'CreateInstance'
+  condition: selection
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Legitimate COM-dependent enterprise applications
+level: informational

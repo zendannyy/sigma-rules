@@ -1,0 +1,43 @@
+title: Linux Socat Reverse or Bind Shell
+id: c5e6f7-0819-5123-e456-789abcdef105
+status: experimental
+description: |
+  Detects socat one-liners used to spawn interactive shells over TCP, a common post-exploitation
+  pattern on Linux servers and containers. Covers bind shells (tcp-listen) and reverse shells
+  (tcp-connect with exec/bash) documented in GTFOBins and observed in web-shell and botnet
+  intrusions.
+author: zendannyy
+date: 2026-06-14
+references:
+  - https://attack.mitre.org/techniques/T1059.004/
+  - https://gtfobins.github.io/gtfobins/socat/
+  - https://www.huntress.com/blog/peerblight-linux-backdoor-exploits-react2shell
+tags:
+  - attack.execution
+  - attack.t1059.004
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '/socat'
+    CommandLine|contains:
+      - 'exec:'
+      - 'EXEC:'
+      - 'tcp-listen:'
+      - 'tcp-connect:'
+      - 'openssl-listen:'
+    CommandLine|contains:
+      - 'bash'
+      - '/bin/sh'
+      - 'exec:/bin/sh'
+      - 'pty,'
+  condition: selection
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Legitimate socat port forwarding for debugging or legacy application bridging
+level: high

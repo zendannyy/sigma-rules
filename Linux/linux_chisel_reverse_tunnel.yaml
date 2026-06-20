@@ -1,0 +1,40 @@
+title: Linux Chisel Reverse Tunnel Client or Server
+id: c4d5e6f7-0819-4012-d345-6789abcdef04
+status: test
+description: |
+  Detects Chisel, a fast TCP/UDP tunnel over HTTP used by ransomware affiliates and APT groups
+  to expose internal SSH, RDP, and management ports through reverse SOCKS or port forwards.
+  Attackers commonly deploy chisel client with R:socks or R:local:remote forwarding after
+  initial compromise.
+author: zendannyy
+date: 2026-06-14
+references:
+  - https://attack.mitre.org/techniques/T1572/
+  - https://github.com/jpillora/chisel
+tags:
+  - attack.command_and_control
+  - attack.t1572
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_binary:
+    Image|endswith: '/chisel'
+  selection_cli:
+    CommandLine|contains: 'chisel'
+    CommandLine|contains:
+      - ' R:'
+      - ' client '
+      - ' server '
+      - '--reverse'
+      - 'socks'
+      - '127.0.0.1:'
+  condition: selection_binary or selection_cli
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized penetration testing and red-team tunneling with documented approval
+level: high

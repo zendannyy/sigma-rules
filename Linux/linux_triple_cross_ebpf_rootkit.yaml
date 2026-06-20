@@ -1,0 +1,44 @@
+title: Linux Triple Cross eBPF Rootkit TC Filter Install
+id: c2b3c4d5-e6f7-4890-b123-456789abcd02
+status: experimental
+description: |
+  Detects install-time commands from the Triple Cross eBPF rootkit deployer that attach a BPF
+  filter to a host NIC via traffic control (tc). The rootkit hijacks execve and other syscalls
+  from kernel space to hide processes, files, and traffic while maintaining C2 access.
+author: zendannyy
+date: 2026-06-13
+references:
+  - https://attack.mitre.org/techniques/T1014/
+  - https://securelist.com/triple-cross-ebpf-linux-rootkit/109286/
+  - https://github.com/h3xduck/TripleCross
+tags:
+  - attack.defense_evasion
+  - attack.t1014
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_tc:
+    Image|endswith:
+      - '/sudo tc'
+    CommandLine|contains|all:
+      - 'filter'
+      - 'bpf'
+    CommandLine|contains:
+      - 'qdisc'
+      - 'ingress'
+      - 'egress'
+  selection_bpftool:
+    Image|endswith: '/bpftool'
+    CommandLine|contains:
+      - 'prog load'
+      - 'pin'
+  condition: 1 of selection_*
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Legitimate eBPF-based observability or Cilium/Calico networking maintenance on Linux hosts
+level: high

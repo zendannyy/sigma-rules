@@ -1,0 +1,43 @@
+title: Hunt - Linux Packet Capture via tcpdump or tshark
+id: e58112a6-be7e-0117-eef4-ba3620761466
+status: experimental
+description: |
+  Hunting rule for non-interactive packet capture on Linux. Prioritize server workloads without NOC inventory, captures writing to /tmp, and parent shells after compromise.
+author: zendannyy
+date: 2026-06-23
+references:
+  - https://attack.mitre.org/techniques/T1040/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1040
+tags:
+  - attack.discovery
+  - attack.t1040
+  - attack.hunting
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_tcpdump:
+    Image|endswith: '/tcpdump'
+    CommandLine|contains:
+      - '-c '
+      - '-w '
+    CommandLine|contains:
+      - '-i'
+      - '-nn'
+      - '-nnni'
+  selection_tshark:
+    Image|endswith: '/tshark'
+    CommandLine|contains:
+      - '-i'
+      - '-c '
+  filter_help:
+    CommandLine|contains: '--help'
+  condition: 1 of selection_* and not filter_help
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+level: test

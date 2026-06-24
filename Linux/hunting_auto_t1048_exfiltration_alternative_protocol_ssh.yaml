@@ -1,0 +1,43 @@
+title: Hunt - Linux Archive Staging Before SSH/SCP Exfiltration
+id: cbe93590-b8ac-5240-07b7-972e249c9fa2
+status: experimental
+description: |
+  Hunting rule for tar archive creation of user home trees, common staging before scp/rsync exfiltration over SSH. Prioritize /tmp archives and remote copy in the same session.
+author: zendannyy
+date: 2026-06-23
+references:
+  - https://attack.mitre.org/techniques/T1048/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1048
+tags:
+  - attack.exfiltration
+  - attack.t1048
+  - attack.hunting
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_archive:
+    CommandLine|contains|all:
+      - 'tar '
+      - 'cz'
+    CommandLine|contains:
+      - '/home/'
+      - '/Users/'
+      - '/root/'
+  selection_exfil:
+    Image|endswith:
+      - '/scp'
+      - '/rsync'
+      - '/ssh'
+    CommandLine|contains:
+      - '@'
+      - ':'
+  condition: selection_archive or selection_exfil
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+level: experimental

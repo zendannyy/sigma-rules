@@ -23,6 +23,7 @@ detection:
       - '/home/'
   condition: selection_strip and selection_temp_target
 fields:
+  - ParentImage
   - Image
   - CommandLine
   - User

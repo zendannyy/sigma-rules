@@ -34,6 +34,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Disk space maintenance and legitimate journal retention tuning
 level: medium

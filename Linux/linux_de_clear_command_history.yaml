@@ -37,6 +37,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - User privacy scripts and container entrypoints that reset history intentionally
 level: low

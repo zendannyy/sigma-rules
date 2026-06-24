@@ -32,6 +32,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Rare packaging or recovery workflows that relocate utilities during upgrades
 level: medium

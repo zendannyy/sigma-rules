@@ -23,6 +23,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Temporary permissive mode during policy debugging by administrators
 level: medium

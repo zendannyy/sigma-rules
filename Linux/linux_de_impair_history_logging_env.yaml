@@ -29,6 +29,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Automation frameworks that disable history in non-interactive contexts
 level: low

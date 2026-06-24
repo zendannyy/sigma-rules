@@ -30,6 +30,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Misguided troubleshooting in lab environments
   - Will serve as a hutning rule, not a detection rule on its own.

@@ -21,6 +21,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Rare developer debugging of dynamic linking issues
 level: medium

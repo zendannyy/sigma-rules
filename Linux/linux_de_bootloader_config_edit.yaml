@@ -30,6 +30,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Kernel upgrades
 level: medium

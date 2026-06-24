@@ -25,8 +25,8 @@ detection:
       - ' -R'
   condition: selection_aa_disable or (selection_apparmor_parser and selection_disable_flags)
 fields:
-  - CommandLine
   - Image
+  - CommandLine
   - User
 falsepositives:
   - Profile updates during legitimate package maintenance

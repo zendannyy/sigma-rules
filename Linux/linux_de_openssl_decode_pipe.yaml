@@ -34,6 +34,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Rare operational scripts that decode secrets locally
 level: medium

@@ -34,6 +34,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Enterprise device management installing internal root CAs
 level: medium

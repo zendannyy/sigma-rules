@@ -25,6 +25,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Cloud inventory agents and approved capacity planning tooling
 level: medium

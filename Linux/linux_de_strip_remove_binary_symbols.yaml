@@ -26,6 +26,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Developers stripping debug symbols from locally built artifacts
 level: low

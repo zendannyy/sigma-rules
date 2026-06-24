@@ -26,6 +26,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Legitimate tools installed under hidden directories by developers
 level: low

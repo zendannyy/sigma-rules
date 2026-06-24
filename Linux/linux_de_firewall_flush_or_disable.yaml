@@ -39,6 +39,7 @@ fields:
   - Image
   - CommandLine
   - User
+
 falsepositives:
   - Network engineering maintenance and automated network bring-up scripts
 level: medium

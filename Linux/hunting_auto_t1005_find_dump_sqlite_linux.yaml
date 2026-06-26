@@ -1,0 +1,36 @@
+title: Hunt: Linux SQLite Database Discovery and Dump
+id: a38f025b-e6c1-a950-62b7-a2e574834e85
+status: experimental
+description: |
+  Hunting rule for find-based SQLite discovery paired with sqlite3 dump. Prioritize browser, mail, or credential store paths and non-admin users.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1005/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1005
+tags:
+  - attack.collection
+  - attack.t1005
+  - attack.hunting
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_find:
+    CommandLine|contains:
+      - 'find '
+      - 'SQLite format 3'
+  selection_dump:
+    Image|endswith: '/sqlite3'
+    CommandLine|contains:
+      - '.dump'
+      - 'SELECT'
+  condition: selection_find and selection_dump
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Database administration and backup scripts
+level: informational

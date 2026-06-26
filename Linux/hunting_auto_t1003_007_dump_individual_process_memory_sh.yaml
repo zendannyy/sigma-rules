@@ -1,0 +1,57 @@
+title: Hunt - Linux Process Heap Dump via /proc/pid/mem and dd
+id: a87c4399-361a-1542-1d35-f65917ebe86b
+status: experimental
+description: |
+  Hunting rule for Linux procfs heap credential harvesting: resolve a target PID
+  (pgrep), locate the heap mapping in /proc/<pid>/maps, then copy a bounded region
+  from /proc/<pid>/mem with dd (ibs=1 skip= count=). Matches Atomic Red Team
+  T1003.007 "Dump individual process memory with sh (Local)".
+  Prioritize output under /tmp, /var/tmp, or /dev/shm and parent shells that are
+  not debuggers or crash-analysis tooling.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1003/007/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1003.007
+  - https://www.cyberciti.biz/faq/linux-procfs-filesystem/
+tags:
+  - attack.credential_access
+  - attack.t1003.007
+  - attack.hunting
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_dd_heap:
+    Image|endswith: '/dd'
+    CommandLine|contains|all:
+      - '/proc/'
+      - '/mem'
+      - 'if='
+    CommandLine|contains:
+      - 'ibs=1'
+      - 'skip='
+      - 'count='
+  selection_maps_heap:
+    Image|endswith: '/grep'
+    CommandLine|contains|all:
+      - '/proc/'
+      - '/maps'
+      - 'heap'
+  selection_pgrep:
+    Image|endswith: '/pgrep'
+    CommandLine|contains|all:
+      - '-f'
+      - '-n'
+  filter_help:
+    CommandLine|contains: '--help'
+  condition: (selection_dd_heap or all of selection_maps_heap, selection_pgrep) and not filter_help
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Debuggers and authorized memory forensics
+  - Application crash dump collection on engineering hosts
+level: informational

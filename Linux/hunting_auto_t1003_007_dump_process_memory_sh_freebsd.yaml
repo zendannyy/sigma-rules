@@ -1,0 +1,60 @@
+title: Hunt: FreeBSD Process Heap Dump via /proc/pid/mem
+id: 4197eaf0-cd41-4820-faa5-7d0d0e35a5af
+status: test
+description: |
+  Hunting rule for FreeBSD-style procfs heap dumping: parse address bounds from
+  /proc/<pid>/map (singular — not Linux maps), then copy a bounded region from
+  /proc/<pid>/mem with dd (ibs=1 skip= count=). Loosely modeled after Atomic Red Team T1003.007
+  Prioritize writes to /tmp, /var/tmp, or /dev/shm and correlate post-dump
+  strings/grep searches for secrets in the same session.
+author: zendannyy
+date: 2026-06-11
+references:
+  - https://attack.mitre.org/techniques/T1003/007/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1003.007
+  - https://man.freebsd.org/cgi/man.cgi?query=procfs
+tags:
+  - attack.credential_access
+  - attack.t1003.007
+  - attack.hunting
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_dd_heap:
+    Image|endswith: '/dd'
+    CommandLine|contains|all:
+      - '/proc/'
+      - '/mem'
+      - 'if='
+    CommandLine|contains:
+      - 'ibs=1'
+      - 'skip='
+      - 'count='
+  selection_map_parse:
+    CommandLine|contains|all:
+      - '/proc/'
+      - '/map'
+    CommandLine|contains:
+      - 'head'
+      - 'tail'
+      - 'cut'
+  selection_pgrep:
+    Image|endswith: '/pgrep'
+    CommandLine|contains|all:
+      - '-f'
+      - '-n'
+  filter_linux_maps:
+    CommandLine|contains: '/maps'
+  filter_help:
+    CommandLine|contains: '--help'
+  condition: (selection_dd_heap or all of selection_map_parse, selection_pgrep) and not 1 of filter_* 
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - System debugging and crash analysis
+  - FreeBSD procfs troubleshooting with procstat
+level: informational

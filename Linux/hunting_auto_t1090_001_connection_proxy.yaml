@@ -1,0 +1,33 @@
+title: Hunt - Linux Connection Proxy (T1090.001)
+id: a1225346-bcd3-9d6d-c13e-35d2e19c449f
+status: experimental
+description: |
+  Hunting rule for Atomic Red Team T1090.001 test "Connection Proxy" (Proxy: Internal Proxy). Correlate with additional signals before alerting.
+author: zendannyy
+date: 2026-06-27
+references:
+  - https://attack.mitre.org/techniques/T1090/001/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1090
+tags:
+  - attack.execution
+  - attack.t1090.001
+  - attack.hunting
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_binary:
+    Image|endswith: '/curl'
+  selection_cmd:
+    CommandLine|contains:
+      - 'export _proxy=:'
+  condition: selection_binary and selection_cmd
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Tune or disable if overlapping with approved admin tooling
+level: informational

@@ -1,0 +1,35 @@
+title: Windows Bypass UAC using Event Viewer
+id: 0104761e-88b1-6d3f-437c-47ebf501123a
+status: experimental
+description: |
+  Rule for T1548.002 technique "Bypass UAC using Event Viewer (cmd)"
+author: zendannyy
+date: 2026-06-29
+references:
+  - https://attack.mitre.org/techniques/T1548/002/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1548
+tags:
+  - attack.privilege_escalation
+  - attack.t1548.002
+  - attack.hunting
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_binary:
+    Image|endswith: '\\reg.exe'
+  selection_cmd:
+    CommandLine|contains|all:
+      - 'hkcu\software\classes\mscfile\shell\open\command'
+      - 'eventvwr.msc'
+      - 'cmd.exe /c'
+  condition: selection_binary and selection_cmd
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Tune or disable if overlapping with approved admin tooling
+level: medium

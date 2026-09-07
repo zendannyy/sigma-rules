@@ -1,0 +1,44 @@
+title: Hunt - Macos Tor Proxy Usage - MacOS (T1090.003)
+id: 683b85ab-7544-5261-966a-d94d707003eb
+status: experimental
+description: |
+  Hunting rule for Atomic Red Team T1090.003 test "Tor Proxy Usage - MacOS"
+  (osascript telling Terminal to run tor). Correlate before alerting.
+author: zendannyy
+date: 2026-06-27
+references:
+  - https://attack.mitre.org/techniques/T1090/003/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1090
+tags:
+  - attack.execution
+  - attack.t1090.003
+  - attack.hunting
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection_osascript_tor:
+    Image|endswith: '/osascript'
+    CommandLine|contains|all:
+      - 'Terminal'
+      - 'do script'
+      - 'tor'
+  selection_tor_binary:
+    Image|endswith: '/tor'
+    CommandLine|contains:
+      - 'SocksPort'
+      - 'torrc'
+      - '--quiet'
+  filter_torbrowser:
+    Image|contains:
+      - 'Tor Browser.app/'
+      - '/TorBrowser/'
+  condition: (selection_osascript_tor or selection_tor_binary) and not filter_torbrowser
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Users intentionally launching tor outside Tor Browser
+level: low

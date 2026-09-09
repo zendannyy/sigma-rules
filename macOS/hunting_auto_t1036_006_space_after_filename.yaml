@@ -9,6 +9,7 @@ date: 2026-07-22
 references:
   - https://attack.mitre.org/techniques/T1036/006/
   - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1036
+  - https://objective-see.org/blog/blog_0x16.html
 tags:
   - attack.defense_evasion
   - attack.t1036.006

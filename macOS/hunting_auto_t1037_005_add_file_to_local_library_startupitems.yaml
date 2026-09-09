@@ -1,0 +1,52 @@
+title: Hunt - Macos Add file to Local Library StartupItems (T1037.005)
+id: 8fec5bf7-42c5-5fec-3f52-6f1fd2df5212
+status: experimental
+description: |
+  Hunting rule for copying payloads into ~/Library/StartupItems; legacy macOS persistence.
+  Prioritize unsigned scripts and non-admin parent shells in correlation.
+author: zendannyy
+date: 2026-07-22
+references:
+  - https://attack.mitre.org/techniques/T1037/005/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1037
+tags:
+  - attack.persistence
+  - attack.t1037.005
+  - attack.hunting
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection_path:
+    Image|endswith:
+      - '/cp'
+      - '/mv'
+      - '/install'
+    CommandLine|contains|all:
+      - 'Library/StartupItems'
+      - '.plist'
+  selection_stage:
+    CommandLine|contains:
+      - '/tmp/'
+      - '/private/tmp/'
+      - '/var/tmp/'
+      - '/Users/Shared/'
+  selection_parent:
+    ParentImage|endswith:
+      - '/bash'
+      - '/sh'
+      - '/zsh'
+      - '/osascript'
+  filter_system:
+    ParentImage|startswith:
+      - '/System/'
+      - '/usr/libexec/'
+  condition: selection_path and selection_stage and selection_parent and not filter_system
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+level: low

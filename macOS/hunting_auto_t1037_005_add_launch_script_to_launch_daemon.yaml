@@ -1,0 +1,55 @@
+title: Hunt:  Macos Add launch script to launch daemon (T1037.005)
+id: a8223224-5cfe-26bf-2826-4f037b0926ca
+status: experimental
+description: |
+  Hunting rule for installing launch daemon plists from user-writable staging paths
+  into /Library/LaunchDaemons, filtering normal package management.
+author: zendannyy
+date: 2026-07-22
+references:
+  - https://attack.mitre.org/techniques/T1037/005/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1037
+tags:
+  - attack.persistence
+  - attack.t1037.005
+  - attack.hunting
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection_dest:
+    CommandLine|contains|all:
+      - '/Library/LaunchDaemons'
+      - '.plist'
+  selection_write:
+    Image|endswith:
+      - '/cp'
+      - '/mv'
+      - '/install'
+    CommandLine|contains:
+      - 'cp '
+      - 'mv '
+  selection_stage:
+    CommandLine|contains:
+      - '/tmp/'
+      - '/private/tmp/'
+      - '/var/tmp/'
+      - '/Users/'
+      - '/Users/Shared/'
+  filter_pkg:
+    ParentImage|contains:
+      - 'package_script_service'
+      - '/Installer.app/'
+      - '/jamf'
+      - '/mdmclient'
+      - '/System/'
+  condition: selection_dest and selection_write and selection_stage and not filter_pkg
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Admin scripts that stage daemon plists under /tmp before install
+level: low

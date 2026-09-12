@@ -1,0 +1,55 @@
+title: macOS launchctl Bootstrap from Suspicious Plist Path
+id: 2b7efa2b-e749-44e6-8b13-1a79dd4bbccd
+status: experimental
+description: |
+  Detects launchctl bootstrap/load of LaunchAgents or LaunchDaemons from temporary
+  or shared user-writable staging paths, indicating persistence or privilege escalation.
+author: zendannyy
+date: 2026-07-06
+references:
+  - https://attack.mitre.org/techniques/T1543/001/
+  - https://attack.mitre.org/techniques/T1543/004/
+  - https://gist.github.com/masklinn/a532dfe55bdeab3d60ab8e46ccc38a68
+tags:
+  - attack.persistence
+  - attack.t1543.001
+  - attack.privilege_escalation
+  - attack.t1543.004
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection_action:
+    Image|endswith: '/launchctl'
+    CommandLine|contains:
+      - 'bootstrap'
+      - ' load '
+      - 'load '
+      - 'unload '
+  selection_suspicious_path:
+    CommandLine|contains:
+      - '/tmp/'
+      - '/var/tmp/'
+      - '/private/tmp/'
+      - '/Users/Shared/'
+  filter_system:
+    ParentImage|startswith:
+      - '/System/'
+      - '/usr/libexec/'
+      - '/Library/Apple/'
+  filter_package_mgmt:
+    ParentImage|contains:
+      - '/Installer.app/'
+      - 'package_script_service'
+      - '/jamf'
+      - '/mdmclient'
+  condition: selection_action and selection_suspicious_path and not 1 of filter_*
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+
+falsepositives:
+  - Rare installers that stage LaunchAgent plists under /tmp before bootstrap
+level: medium

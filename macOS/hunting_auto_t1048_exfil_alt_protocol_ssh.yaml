@@ -1,0 +1,51 @@
+title: Hunt - Macos Exfiltration Over Alternative Protocol - SSH (T1048)
+id: c62bc512-fc24-20a1-3023-4af594869f93
+status: experimental
+description: |
+  Hunting rule for Atomic Red Team T1048 SSH exfil patterns: tar piped over ssh,
+  optionally with openssl. Ordinary rsync to remotes is excluded to reduce noise.
+author: zendannyy
+date: 2026-06-23
+references:
+  - https://attack.mitre.org/techniques/T1048/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1048
+tags:
+  - attack.exfiltration
+  - attack.t1048
+  - attack.hunting
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection_tar_ssh:
+    CommandLine|contains|all:
+      - 'tar '
+      - 'ssh '
+    CommandLine|contains:
+      - '/Users/'
+      - '/etc'
+      - 'cz'
+      - 'zcvf'
+  selection_tar_openssl_ssh:
+    CommandLine|contains|all:
+      - 'tar '
+      - 'openssl'
+      - 'ssh '
+  filter_command:
+      - 'rsync '
+  filter_git:
+    CommandLine|contains:
+      - 'git@'
+      - 'github.com'
+      - 'gitlab.com'
+      - 'bitbucket.org'
+  condition: (selection_tar_ssh or selection_tar_openssl_ssh) and not 1 of filter_*
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Backup scripts that tar user data over SSH
+level: low

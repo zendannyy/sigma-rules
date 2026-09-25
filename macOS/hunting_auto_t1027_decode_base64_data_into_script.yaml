@@ -1,0 +1,56 @@
+title: Hunt - Macos Decode base64 Data into Script (T1027)
+id: 724e5e35-2d67-a8da-2125-9a8de9de88d8
+status: experimental
+description: |
+  
+author: zendannyy
+date: 2026-06-27
+references:
+  - https://attack.mitre.org/techniques/T1027/
+  - https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/T1027
+tags:
+  - attack.defense_evasion
+  - attack.t1027
+  - attack.hunting
+logsource:
+  product: macos
+  category: process_creation
+detection:
+  selection_decode:
+    CommandLine|contains:
+      - 'base64 -d'
+      - 'base64 -D'
+      - 'base64 --decode'
+    CommandLine|contains:
+      - '| sh'
+      - '| bash'
+      - '| zsh'
+      - '|osascript'
+      - '> /tmp/'
+      - '> /private/tmp/'
+  selection_host:
+    Image|endswith:
+      - '/bash'
+      - '/sh'
+      - '/zsh'
+      - '/osascript'
+  filter_parent:
+    ParentImage|contains:
+      - '/Xcode.app/'
+      - '/Homebrew/'
+      - 'Visual Studio Code.app/'
+  filter_cmd:
+    CommandLine|contains:
+      - 'node_modules/'
+      - 'brew install'
+      - 'brew upgrade'
+  condition: selection_decode and selection_host and not 1 of filter_*
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - User
+falsepositives:
+  - Authorized red team or security assessment activity
+  - Dev tooling that decodes fixtures into /tmp during builds
+level: low

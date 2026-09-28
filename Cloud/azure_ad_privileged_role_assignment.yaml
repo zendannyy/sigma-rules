@@ -29,6 +29,7 @@ fields:
   - InitiatedBy.user.userPrincipalName
   - TargetResources.userPrincipalName
   - OperationName
+
 falsepositives:
   - Planned IAM changes during onboarding and break-glass procedures
   - This will need some filtering for approved IAM list

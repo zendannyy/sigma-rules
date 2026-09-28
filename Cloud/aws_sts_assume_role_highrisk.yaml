@@ -18,9 +18,9 @@ references:
   - https://attack.mitre.org/techniques/T1550/001/
   - https://docs.aws.amazon.com/IAM/latest/UserGuide/cloudtrail-integration.html
 tags:
-  - attack.defense-evasion
   - attack.t1078.004
   - attack.lateral-movement
+  - attack.privilege_escalation
   - attack.t1550.001
 logsource:
   product: aws
@@ -43,7 +43,6 @@ detection:
       - 'OrganizationAccountAccessRole'
       - 'Administrator'
       - 'AdminAccess'
-      - 'PowerUser'
       - 'FullAccess'
       - 'SecurityAudit'
       - 'ViewOnlyAccess'
@@ -97,6 +96,7 @@ fields:
   - requestParameters.durationSeconds
   - userAgent
   - recipientAccountId
+
 falsepositives:
   - IAM users or break-glass roles legitimately assuming privileged roles with MFA enforced elsewhere
   - Long-lived automation using non-standard SDK user-agent strings
